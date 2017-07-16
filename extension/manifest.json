@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+
+  "name": "Legrooms for Google Flights",
+  "short_name": "Legroom,pls",
+  "description": "Enhances Google Flights search by surfacing legroom information on search listing.",
+  "version": "1.4",
+  "icons": {
+    "16": "seat_16.png",
+    "48": "seat_48.png",
+    "128": "seat_128.png"
+  },
+  "permissions": [
+    "activeTab"
+  ],
+  "web_accessible_resources": [
+    "inject_script.js",
+    "inject_style.css"
+  ],
+  "content_scripts": [{
+    "matches": ["https://www.google.com/flights/*"],
+    "js": [ "content_script.js" ],
+    "run_at": "document_end"
+  }]
+}
