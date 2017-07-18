@@ -16,9 +16,6 @@
 .legroom-s span.yellow {
   color: #db4437;
 }
-.OMOBOQD-d-bc .legroom-s {
-  border-color: #ccc;
-}
 
 /* Notice. */
 a.legroom-notice {
@@ -33,26 +30,3 @@ a.legroom-notice:hover {
   text-decoration: underline;
 }
 
-/* Layout table. */
-table.OMOBOQD-f-i {
-  width: 940px;
-}
-
-/* Middle column. */
-div.OMOBOQD-f-e {
-  width: 750px;
-}
-
-/* Columns. */
-.OMOBOQD-d-Lb>.OMOBOQD-d-X>div.OMOBOQD-d-Bb {
-  width: 15.2%;
-}
-.OMOBOQD-d-Lb>.OMOBOQD-d-X>div.OMOBOQD-d-ac {
-  width: 36.2%;
-}
-.OMOBOQD-d-Lb>.OMOBOQD-d-X>div.OMOBOQD-d-Jb {
-  width: 15.5%;
-}
-.OMOBOQD-d-Lb>.OMOBOQD-d-X>div.OMOBOQD-d-Sb {
-  width: 17.1%;
-}
