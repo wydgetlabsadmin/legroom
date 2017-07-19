@@ -6,3 +6,5 @@ When browsing for flights, we get a listing by cost, schedule and duration. For 
 
 With this extension, legroom information will be shown on the search result! It is time to show the airlines that we care about our comfort too.
 
+[Link to Chrome Web Store](https://chrome.google.com/webstore/detail/legrooms-for-google-fligh/nhonfddkgankhjilponlbdccpabaaknp).
+
