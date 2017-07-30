@@ -4,6 +4,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
   // Class prefix. Changes per GWT deployment, so need to figure out
   // from #root.
   var prefix = '';
+  var isInch = false;
 
   /**
    * Adds classname prefix to given string or array of strings.
@@ -59,9 +60,9 @@ console.log('Enhancing Google Flights search with amenities extension.');
   var toSeatInfo = function(obj) {
     var legroomCm = obj['7'];
     if (legroomCm) {
-      // to inches.
       return {
         inch: Math.round(legroomCm * 0.3937) + '"',
+        cm: legroomCm + ' cm',
         type: obj['6']
       };
     }
@@ -90,7 +91,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
       if (!seat) {
         return;
       }
-      var text = seat.inch;
+      var text = (isInch) && seat.inch || seat.cm;
       var green = (seat.type == '4');
       var yellow = (seat.type == '3');
       if (!text) {
@@ -165,6 +166,9 @@ console.log('Enhancing Google Flights search with amenities extension.');
   };
 
   window.addEventListener('load', function() {
+    if (window.location.host.match(/\.com$/)) {
+      isInch = true;
+    }
     observeForClassPrefix(function(p) {
       prefix = p;
       injectStyles();
