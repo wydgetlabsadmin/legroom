@@ -20,82 +20,155 @@ console.log('Enhancing Google Flights search with amenities extension.');
 
   /**
    * @param {string} jsonStr Data from backend.
-   * @return {Map<number, string>} Itinerary number to legroom
+   * @param {=number} opt_itineraryNumber Itinerary this data is for.
+   * @return {Map<number, Itinerary>} Itinerary number to legroom
    *     dimension text, or null if passed in data is not parseable.
    */
-  var parse = function(jsonStr) {
+  function parse(jsonStr, opt_itineraryNumber) {
     var json = JSON.parse(jsonStr);
+    var dataJsonStr = json['1'][0]['2'];
+    if (!dataJsonStr) {
+      return null;
+    }
     try {
-      var dataJsonStr = json['1'][0]['2'];
       var dataJson = JSON.parse(dataJsonStr);
       if (!dataJson['8']) {
         return null;
       }
       var trips = dataJson['8']['1'];
+      if (!trips) {
+        return null;
+      }
+      let tickets = dataJson[8] && dataJson[8][4] && dataJson[8][4][2];
+      /** @type {!Map<number, Itinerary>} */
       var itiLegroomMap = new Map();
-      trips.forEach(function(trip) {
-        var itin = trip['1'];
-        var flights = trip['2']['1'];
-        var seats = [];
-        flights.forEach(function(flight, i) {
-          var legroom = toSeatInfo(flight['12']);
-          seats.push(legroom);
-        });
-        itiLegroomMap.set(itin, seats);
+      trips.forEach((trip, index) => {
+        let ticket = tickets && tickets[index];
+        /** @type {!Itinerary} */
+        let itinerary = {
+          // trip[2][1] are list of flights.
+          flights: trip[2][1].map((flight, fi) => {
+              let info = toFlightInfo(flight);
+              if (ticket && ticket[1] && ticket[1][fi]) {
+                info.carry_on_restricted = !!ticket[1][fi][2];
+              }
+              return info;
+          })
+        };
+        itinerary.has_detail = !isDetailNeeded(itinerary) ||
+            opt_itineraryNumber !== undefined
+        let num = opt_itineraryNumber || trip[1];
+        itiLegroomMap.set(num, itinerary);
       });
       return itiLegroomMap;
     } catch (e) {
       console.log(e);
+      console.log(json);
       return null;
     }
   };
 
+  const AIRLINES_NEED_DETAILS = ['UA', 'F9', 'NK', 'WW', 'AA'];
+
+  /** Only fetch detail for UA. */
+  function isDetailNeeded(itinerary) {
+    return itinerary.flights.some(
+        (f) => (AIRLINES_NEED_DETAILS.includes(f.airline)));
+  }
+
+  /**
+   * @return {!FlightInfo} from RPC data.
+   */
+  function toFlightInfo(flightData) {
+    let retVal = {};
+    let amenities = flightData['12'];
+    retVal.seat_type = amenities['6'];
+    retVal.seat_description = seatTypeMap[amenities['6']];
+    let legroomCm = amenities['7'];
+    if (legroomCm) {
+      retVal.inch = Math.round(legroomCm * 0.3937) + '"';
+      retVal.cm = legroomCm + ' cm';
+    };
+    retVal.departure = flightData[1];
+    retVal.arrival = flightData[3];
+    retVal.departure_time = flightData[2];
+    retVal.arrival_time = flightData[4];
+    retVal.airline = flightData[5];
+    retVal.flight_number = flightData[6];
+    retVal.aircraft = flightData[9];
+    let delayInfo = flightData[11];
+    if (delayInfo) {
+      retVal.delayInfo = {
+        by_15min_pct: delayInfo[1],
+        by_30min_pct: delayInfo[2],
+        by_45min_pct: delayInfo[3],
+        cancelled_pct: delayInfo[4]
+      };
+    }
+      
+    return retVal;
+  };
+
   var seatTypeMap = {
+    '0': 'No seat type',
+    '1': 'Who knows',
+    '2': 'Average',
+    '3': 'Below Average',
+    '4': 'Above Average',
     '5': 'Lie Flat',
     '6': 'Suite',
     '7': 'Recliner',
     '8': 'Extra Recliner',
     '9': 'Angled Flat'
   };
-  var toSeatInfo = function(obj) {
-    var legroomCm = obj['7'];
-    if (legroomCm) {
-      return {
-        inch: Math.round(legroomCm * 0.3937) + '"',
-        cm: legroomCm + ' cm',
-        type: obj['6']
-      };
-    }
-    var seatType = obj['6'];
-    return { type: seatType };
-  };
+
+  function findItineraryNode(itineraryNumber) {
+    return (itineraryNumber == 0) ?
+        document.querySelector(pfx('-d-Lb') +
+            ':not([iti]):not(' + pfx('-d-cc') + ')' +
+            ':not(' + pfx('-d-X') + ')') :
+        document.querySelector(
+            pfx('-d-Lb') + '[iti="' + itineraryNumber + '"]');
+  }
 
   /**
    * @return {boolean} True if node is updated, false otherwise.
    */
-  var updateNode = function(n) {
+  function updateNode(n, opt_ignoreDetail) {
     var itinMap = cachedItinerary.get(window.location.hash);
     if (!itinMap) {
       return false;
     }
     var itin = n.getAttribute('iti');
     itin = (!itin || itin == '') ? 0 : Number(itin);
-    var seats = itinMap.get(itin);
-    if (!seats) {
+    var itinerary = itinMap.get(itin);
+    if (!itinerary) {
       return false;
+    }
+    // Is detail loaded?
+    if (!opt_ignoreDetail && !itinerary.has_detail) {
+      window.setTimeout(function() {
+          loadDetail(Number(itin), () => updateNode(n, true));
+      }, 250);
+    }
+
+    // Remote existing node.
+    var existing = n.querySelector('.legroom-s');
+    if (existing) {
+      existing.parentNode.removeChild(existing);
     }
     var elem = document.createElement('div');
     elem.classList.add('legroom-s');
     elem.title = 'Legroom';
-    seats.forEach(function(seat) {
-      if (!seat) {
+    itinerary.flights.forEach(flight => {
+      if (!flight) {
         return;
       }
-      var text = (isInch) && seat.inch || seat.cm;
-      var green = (seat.type == '4');
-      var yellow = (seat.type == '3');
+      let text = (isInch) && flight.inch || flight.cm;
+      let green = (flight.seat_type == '4');
+      let yellow = (flight.seat_type == '3');
       if (!text) {
-        text = seatTypeMap[seat.type] || '?';
+        text = flight.seat_description || '?';
       }
       var span = document.createElement('span');
       span.textContent = text;
@@ -106,28 +179,39 @@ console.log('Enhancing Google Flights search with amenities extension.');
         span.classList.add('yellow');
       }
       elem.appendChild(span);
+      if (flight.carry_on_restricted) {
+        let noCarryOn = document.createElement('div');
+        noCarryOn.classList.add(prefix + '-d-kb');
+        noCarryOn.classList.add('legroom-carryon');
+        span.appendChild(noCarryOn);
+      }
     });
-    var a = n.querySelector(pfx('-d-X') + '>' + pfx('-d-Sb')); // Child link.
+    let a = n.querySelector(pfx('-d-X') + '>' + pfx('-d-Sb')); // Child link.
     a.after(elem);
     return true;
   };
 
   var cachedItinerary = new Map();
 
-  var processRpc = function(json) {
-    var map = parse(json);
-    if (map != null) {
-      var key = window.location.hash;
-      var existingMap = cachedItinerary.get(key);
-      if (existingMap) {
-        map.forEach(function(v, k) {
-          existingMap.set(k, v);
-        });
-      } else {
-        cachedItinerary.set(key, map);
-      }
+  function processRpc(json, opt_itineraryNumber) {
+    var map = parse(json, opt_itineraryNumber);
+    if (!map) {
+      return;
+    }
+    var key = window.location.hash;
+    var existingMap = cachedItinerary.get(key);
+    if (existingMap) {
+      map.forEach(function(v, k) {
+        existingMap.set(k, v);
+      });
+    } else {
+      cachedItinerary.set(key, map);
     }
   };
+
+  var searchJson;
+  var searchHeaders;
+  var detailFlag = true;
 
   var open = XMLHttpRequest.prototype.open;
   XMLHttpRequest.prototype.open = function() {
@@ -135,10 +219,102 @@ console.log('Enhancing Google Flights search with amenities extension.');
     var url = arguments[1]; 
     if (method == 'POST' && url == 'rpc') {
       this.addEventListener('loadend', function() {
-        processRpc(this.responseText);
+        processRpc(this.responseText, this.itineraryNumber);
+        if (this.node_callback) {
+          this.node_callback();
+        }
       }.bind(this));
     }
     return open.apply(this, arguments);
+  };
+  var xhrSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
+  XMLHttpRequest.prototype.setRequestHeader = function() {
+    this.dreHeaders = this.dreHeaders || {};
+    this.dreHeaders[arguments[0]] = arguments[1];
+    return xhrSetRequestHeader.apply(this, arguments);
+  };
+  var xhrSend = XMLHttpRequest.prototype.send;
+  XMLHttpRequest.prototype.send = function() {
+    if (this.itineraryNumber === undefined && // Ignore detail rpc.
+        arguments[0] && arguments[0].match(/"1":"fs"/)) {
+      searchJson = arguments[0];
+      deconstruct(searchJson);
+      searchHeaders = this.dreHeaders;
+    }
+    return xhrSend.apply(this, arguments);
+  };
+
+  function loadDetail(itineraryNumber, opt_callback) {
+    let itinMap = cachedItinerary.get(window.location.hash);
+    let itinerary = itinMap.get(itineraryNumber);
+    if (!itinerary) {
+      return; // Do nothing.
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'rpc', true);
+    xhr.setRequestHeader('Content-type', 'application/json');
+    for (var name in searchHeaders) {
+      xhr.setRequestHeader(name, searchHeaders[name]);
+    }
+    xhr.node_callback = opt_callback;
+    xhr.itineraryNumber = itineraryNumber;
+    var reqJson = enhanceSearch(searchJson, itinerary);
+    if (reqJson) {
+      xhr.send(reqJson);
+    }
+  };
+
+  // TODO: remove me.
+  function deconstruct(reqJson) {
+    var reqObj = JSON.parse(reqJson);
+    var actTxt = reqObj['1'][0]['2'];
+    if (!actTxt) {
+      return;
+    }
+    var actObj = JSON.parse(actTxt);
+    console.log(actObj);
+  }
+
+  var enhanceSearch = function(reqJson, itinerary) {
+    var reqObj = JSON.parse(reqJson);
+    var actTxt = reqObj['1'][0]['2'];
+    if (!actTxt) {
+      return reqJson;
+    }
+    var actObj = JSON.parse(actTxt);
+    let itinMap = cachedItinerary.get(window.location.hash);
+    if (!itinerary.flights) {
+      return null;
+    }
+    let flights = itinerary.flights.map(f => {
+      return {1: f.airline,
+        2: f.flight_number,
+        3: f.departure,
+        4: f.arrival,
+        5: f.departure_time.replace(/T.*$/, '')
+      };
+    });
+
+    // Find empty slots. For roundtrip or multi-city trip
+    // when user already choose one or a few flight, we want
+    // to get info for the next one.
+    let flightIndex = actObj[1][1].findIndex(f => !f['4']);
+
+    // Clear out the remainder, as if this is the last flight.
+    actObj[1][1] = actObj[1][1].slice(0, flightIndex + 1);
+    actObj[1][1][flightIndex]['4'] = { 1: flights };
+    delete actObj[1][8];
+    actObj['2'] = {2:1};
+    console.log(actObj);
+    reqObj['1'][0]['2'] = JSON.stringify(actObj);
+    return JSON.stringify(reqObj);
+  };
+
+  var requestDetail = function() {
+    var data = enhanceSearch(searchJson);
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'rpc');
+    xhr.send(data);
   };
 
   var addNotice = function(header) {

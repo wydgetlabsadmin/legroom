@@ -5,9 +5,8 @@
 }
 .legroom-s span {
   display: block;
-  padding-bottom: 1px;
-  padding-right: 0.5em;
-  padding-top: 2px;
+  line-height: 150%;
+  vertical-align: middle;
 }
 .legroom-s span.green {
   color: #093;
@@ -16,7 +15,12 @@
 .legroom-s span.yellow {
   color: #db4437;
 }
-
+.legroom-s .legroom-carryon {
+  display: inline-block;
+  margin: 0;
+  padding-left: 1em;
+  vertical-align: middle;
+}
 /* Notice. */
 a.legroom-notice {
   bottom: 6px;
