@@ -12,3 +12,17 @@
   (document.head || document.documentElement).appendChild(l);
 })();
 
+function sendFocusMessage() {
+  chrome.runtime.sendMessage(null, {type:'focus'});
+}
+
+function sendBlurMessage() {
+  chrome.runtime.sendMessage(null, {type:'blur'});
+}
+
+window.addEventListener('focus', sendFocusMessage);
+window.addEventListener('load', sendFocusMessage);
+
+window.addEventListener('blur', sendBlurMessage);
+window.addEventListener('unload', sendBlurMessage);
+

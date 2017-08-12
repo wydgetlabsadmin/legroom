@@ -5,6 +5,14 @@
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legroom information on search listing.",
   "version": "1.7",
+  "page_action": {
+    "default_icon": {
+      "16": "seat_16.png",
+      "48": "seat_48.png",
+      "128": "seat_128.png"
+    },
+    "default_title": "Legroom"
+  },
   "icons": {
     "16": "seat_16.png",
     "48": "seat_48.png",
@@ -49,5 +57,9 @@
     ],
     "js": [ "content_script.js" ],
     "run_at": "document_end"
-  }]
+  }],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": false
+  }
 }
