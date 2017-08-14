@@ -63,7 +63,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
       return itiLegroomMap;
     } catch (e) {
       console.log(e);
-      console.log(json);
       return null;
     }
   };
@@ -219,9 +218,11 @@ console.log('Enhancing Google Flights search with amenities extension.');
     var url = arguments[1]; 
     if (method == 'POST' && url == 'rpc') {
       this.addEventListener('loadend', function() {
-        processRpc(this.responseText, this.itineraryNumber);
-        if (this.node_callback) {
-          this.node_callback();
+        if (this.status >= 200 && this.status < 300) {
+          processRpc(this.responseText, this.itineraryNumber);
+          if (this.node_callback) {
+            this.node_callback();
+          }
         }
       }.bind(this));
     }
@@ -238,7 +239,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (this.itineraryNumber === undefined && // Ignore detail rpc.
         arguments[0] && arguments[0].match(/"1":"fs"/)) {
       searchJson = arguments[0];
-      deconstruct(searchJson);
       searchHeaders = this.dreHeaders;
     }
     return xhrSend.apply(this, arguments);
@@ -263,17 +263,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
       xhr.send(reqJson);
     }
   };
-
-  // TODO: remove me.
-  function deconstruct(reqJson) {
-    var reqObj = JSON.parse(reqJson);
-    var actTxt = reqObj['1'][0]['2'];
-    if (!actTxt) {
-      return;
-    }
-    var actObj = JSON.parse(actTxt);
-    console.log(actObj);
-  }
 
   var enhanceSearch = function(reqJson, itinerary) {
     var reqObj = JSON.parse(reqJson);
@@ -305,7 +294,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     actObj[1][1][flightIndex]['4'] = { 1: flights };
     delete actObj[1][8];
     actObj['2'] = {2:1};
-    console.log(actObj);
     reqObj['1'][0]['2'] = JSON.stringify(actObj);
     return JSON.stringify(reqObj);
   };

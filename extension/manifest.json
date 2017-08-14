@@ -5,18 +5,14 @@
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legroom information on search listing.",
   "version": "1.7",
-  "page_action": {
+  "browser_action": {
     "default_icon": {
-      "16": "seat_16.png",
-      "48": "seat_48.png",
-      "128": "seat_128.png"
+      "16": "seat_16_grey.png",
+      "48": "seat_48_grey.png",
+      "128": "seat_128_grey.png"
     },
-    "default_title": "Legroom"
-  },
-  "icons": {
-    "16": "seat_16.png",
-    "48": "seat_48.png",
-    "128": "seat_128.png"
+    "default_title": "Legroom",
+    "default_popup": "no_flight_popup.html"
   },
   "permissions": [
     "activeTab"
