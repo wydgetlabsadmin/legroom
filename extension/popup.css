@@ -6,6 +6,10 @@ body {
   padding: 0;
   width: 18em
 }
+p {
+  margin: 0;
+  padding: 0;
+}
 h1 {
   background-color: limegreen;
   color: #eaffea;
@@ -16,14 +20,16 @@ h1 {
   padding: 0.5em 10px;
   text-shadow: 1px 1px 1px forestgreen;
 }
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
 a.fl {
   color: blue;
   display: block;
   margin: 0.8em 10px;
-  text-decoration: none;
-}
-a.fl:hover {
-  text-decoration: underline;
 }
 .info {
   font-size: 12px;
@@ -33,5 +39,16 @@ a.fl:hover {
   -webkit-margin-before: 0.5em;
   -webkit-margin-after: 0.5em;
   line-height: 145%;
+}
+footer {
+  background-color: gold;
+  margin: 2em 0 0;
+  padding: 1em 10px;
+}
+footer a {
+  color: black;
+}
+footer p {
+  margin-top: 1em;
 }
 
