@@ -1,13 +1,12 @@
+let activeTabIds = new Set();
+
 chrome.runtime.onMessage.addListener(
-    function(message, sender) {
+    function(message, sender, responseFn) {
       if (!message.type) {
         return; // No type. Probably not our message.
       }
       if (message.type == 'activate') {
-        chrome.browserAction.setPopup({
-          tabId: sender.tab.id,
-          popup: "flight_popup.html"
-        });
+        activeTabIds.add(sender.tab.id);
         chrome.browserAction.setIcon({
           tabId: sender.tab.id,
           path: {
@@ -18,10 +17,7 @@ chrome.runtime.onMessage.addListener(
         });
       }
       if (message.type == 'disactivate') {
-        chrome.browserAction.setPopup({
-          tabId: sender.tab.id,
-          popup: "no_flight_popup.html"
-        });
+        activeTabIds.delete(sender.tab.id);
         chrome.browserAction.setIcon({
           tabId: sender.tab.id,
           path: {
@@ -30,6 +26,9 @@ chrome.runtime.onMessage.addListener(
             '128':'seat_128_grey.png'
           }
         });
+      }
+      if (message.type == 'is_active' && message.tab_id) {
+        responseFn(activeTabIds.has(message.tab_id));
       }
     });
 

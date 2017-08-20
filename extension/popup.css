@@ -6,6 +6,12 @@ body {
   padding: 0;
   width: 18em
 }
+body.active .inactive {
+  display: none;
+}
+body:not(.active) .active {
+  display: none;
+}
 p {
   margin: 0;
   padding: 0;

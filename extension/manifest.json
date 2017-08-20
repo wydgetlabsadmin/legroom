@@ -4,7 +4,7 @@
   "name": "Legrooms for Google Flights",
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legroom and carry-on restrictions information on search listing.",
-  "version": "1.7",
+  "version": "1.7.1",
   "browser_action": {
     "default_icon": {
       "16": "seat_16_grey.png",
@@ -12,7 +12,7 @@
       "128": "seat_128_grey.png"
     },
     "default_title": "Legroom",
-    "default_popup": "no_flight_popup.html"
+    "default_popup": "popup.html"
   },
   "permissions": [
     "activeTab"
