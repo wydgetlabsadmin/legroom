@@ -32,3 +32,24 @@ chrome.runtime.onMessage.addListener(
       }
     });
 
+
+/**
+ * Generates a unique ID and store it in local storage.
+ * @return {string} unique ID for this installation.
+ */
+function generateUniqueId() {
+  if (!window.localStorage) {
+    return; // Local storage unsupported. Do nothing.
+  }
+  let existingId = window.localStorage.getItem('installId');
+  if (existingId) {
+    return existingId; // Exist. Return it.
+  }
+  let uniqueId = ((new Date()).getTime()).toString(32) +
+      Math.round(Math.random() * 1e6).toString(32);
+  window.localStorage.setItem('installId', uniqueId);
+  return uniqueId;
+}
+chrome.runtime.onInstalled.addListener(generateUniqueId);
+chrome.runtime.onStartup.addListener(generateUniqueId);
+
