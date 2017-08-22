@@ -18,6 +18,9 @@ console.log('Enhancing Google Flights search with amenities extension.');
     return '.' + prefix + s;
   }
 
+  /** Map of aircraft code and full name. */
+  let aircraftMap = new Map();
+
   /**
    * @param {string} jsonStr Data from backend.
    * @param {=number} opt_itineraryNumber Itinerary this data is for.
@@ -35,6 +38,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
       if (!dataJson['8']) {
         return null;
       }
+      extractAuxData(dataJson); // Such as code-name mappings.
       var trips = dataJson['8']['1'];
       if (!trips) {
         return null;
@@ -121,6 +125,15 @@ console.log('Enhancing Google Flights search with amenities extension.');
     '9': 'Angled Flat'
   };
 
+  function extractAuxData(dataJson) {
+    if (dataJson[9]) {
+      let aircrafts = dataJson[9];
+      aircrafts.forEach((aircraft) => {
+        aircraftMap.set(aircraft[1], aircraft[3]);
+      });
+    }
+  }
+
   function findItineraryNode(itineraryNumber) {
     return (itineraryNumber == 0) ?
         document.querySelector(pfx('-d-Lb') +
@@ -158,7 +171,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     }
     var elem = document.createElement('div');
     elem.classList.add('legroom-s');
-    elem.title = 'Legroom';
     itinerary.flights.forEach(flight => {
       if (!flight) {
         return;
@@ -169,21 +181,32 @@ console.log('Enhancing Google Flights search with amenities extension.');
       if (!text) {
         text = flight.seat_description || '?';
       }
-      var span = document.createElement('span');
-      span.textContent = text;
+      var line = document.createElement('div');
+      elem.appendChild(line);
+      let legroom = document.createElement('span');
+      legroom.classList.add('legs');
+      legroom.textContent = text;
+      legroom.title = 'Legroom';
       if (green) {
-        span.classList.add('green');
+        legroom.classList.add('green');
       }
       if (yellow) {
-        span.classList.add('yellow');
+        legroom.classList.add('yellow');
       }
-      elem.appendChild(span);
+      line.appendChild(legroom);
       if (flight.carry_on_restricted) {
         let noCarryOn = document.createElement('div');
         noCarryOn.classList.add(prefix + '-d-kb');
         noCarryOn.classList.add('legroom-carryon');
-        span.appendChild(noCarryOn);
+        noCarryOn.title = 'Restricted Carry-On';
+        line.appendChild(noCarryOn);
       }
+      // Aircraft.
+      let aircraft = document.createElement('span');
+      aircraft.classList.add('aircraft');
+      aircraft.textContent = flight.aircraft;
+      aircraft.title = aircraftMap.get(flight.aircraft);
+      line.appendChild(aircraft);
     });
     let a = n.querySelector(pfx('-d-X') + '>' + pfx('-d-Sb')); // Child link.
     a.after(elem);

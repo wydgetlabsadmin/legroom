@@ -3,16 +3,19 @@
   position:relative;
   width: 16%;
 }
-.legroom-s span {
+.legroom-s div {
   display: block;
   line-height: 150%;
   vertical-align: middle;
 }
-.legroom-s span.green {
+.legroom-s .legs {
+  margin-right: 1em;
+}
+.legroom-s .legs.green {
   color: #093;
   font-weight: bold;
 }
-.legroom-s span.yellow {
+.legroom-s .legs.yellow {
   color: #db4437;
 }
 .legroom-s .legroom-carryon {
@@ -20,6 +23,9 @@
   margin: 0;
   padding-left: 1em;
   vertical-align: middle;
+}
+.legroom-s .aircraft {
+  margin-left: 1em;
 }
 /* Notice. */
 a.legroom-notice {
