@@ -4,19 +4,38 @@ console.log('Enhancing Google Flights search with amenities extension.');
   // Class prefix. Changes per GWT deployment, so need to figure out
   // from #root.
   var prefix = '';
-  var isInch = false;
+
+  // User settings.
+  let settings = {
+    legroom: true,
+    aircraft: true,
+    carryOn: true,
+    wifi: true,
+    power: true,
+    inch: false
+  };
 
   /**
    * Adds classname prefix to given string or array of strings.
    */
-  var pfx = function(s) {
+  function cpfx(s) {
     if (s.map) {
       return s.map(function(a) {
         return '.' + prefix + a;
       });
     }
-    return '.' + prefix + s;
+    return prefix + s;
   }
+  function pfx(s) {
+    let c = cpfx(s);
+    if (c.map) {
+      return c.map((a) => '.' + a);
+    }
+    return '.' + c;
+  }
+
+  /** Map of aircraft code and full name. */
+  let aircraftMap = new Map();
 
   /**
    * @param {string} jsonStr Data from backend.
@@ -35,6 +54,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
       if (!dataJson['8']) {
         return null;
       }
+      extractAuxData(dataJson); // Such as code-name mappings.
       var trips = dataJson['8']['1'];
       if (!trips) {
         return null;
@@ -88,6 +108,10 @@ console.log('Enhancing Google Flights search with amenities extension.');
       retVal.inch = Math.round(legroomCm * 0.3937) + '"';
       retVal.cm = legroomCm + ' cm';
     };
+    retVal.wifi = (amenities[1] || 0) > 1; // 1:no, 2:yes.
+    retVal.power = (amenities[2] || 0) > 1; // 1:no, 2:yes.
+    retVal.usb = (amenities[3] || 0) > 1; // 1:no, 2:yes.
+    retVal.video = amenities[8] || 0; // 1:on-demand, 2:stream.
     retVal.departure = flightData[1];
     retVal.arrival = flightData[3];
     retVal.departure_time = flightData[2];
@@ -96,6 +120,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
     retVal.flight_number = flightData[6];
     retVal.aircraft = flightData[9];
     let delayInfo = flightData[11];
+    console.log(flightData);
     if (delayInfo) {
       retVal.delayInfo = {
         by_15min_pct: delayInfo[1],
@@ -120,6 +145,15 @@ console.log('Enhancing Google Flights search with amenities extension.');
     '8': 'Extra Recliner',
     '9': 'Angled Flat'
   };
+
+  function extractAuxData(dataJson) {
+    if (dataJson[9]) {
+      let aircrafts = dataJson[9];
+      aircrafts.forEach((aircraft) => {
+        aircraftMap.set(aircraft[1], aircraft[3]);
+      });
+    }
+  }
 
   function findItineraryNode(itineraryNumber) {
     return (itineraryNumber == 0) ?
@@ -151,44 +185,103 @@ console.log('Enhancing Google Flights search with amenities extension.');
       }, 250);
     }
 
-    // Remote existing node.
+    // Remove existing node.
     var existing = n.querySelector('.legroom-s');
     if (existing) {
       existing.parentNode.removeChild(existing);
     }
     var elem = document.createElement('div');
     elem.classList.add('legroom-s');
-    elem.title = 'Legroom';
     itinerary.flights.forEach(flight => {
       if (!flight) {
         return;
       }
-      let text = (isInch) && flight.inch || flight.cm;
-      let green = (flight.seat_type == '4');
-      let yellow = (flight.seat_type == '3');
-      if (!text) {
-        text = flight.seat_description || '?';
-      }
-      var span = document.createElement('span');
-      span.textContent = text;
-      if (green) {
-        span.classList.add('green');
-      }
-      if (yellow) {
-        span.classList.add('yellow');
-      }
-      elem.appendChild(span);
-      if (flight.carry_on_restricted) {
-        let noCarryOn = document.createElement('div');
-        noCarryOn.classList.add(prefix + '-d-kb');
-        noCarryOn.classList.add('legroom-carryon');
-        span.appendChild(noCarryOn);
-      }
+      enhanceRow(elem, flight);
     });
-    let a = n.querySelector(pfx('-d-X') + '>' + pfx('-d-Sb')); // Child link.
+    // Child link.
+    let a = n.querySelector(pfx('-d-X') + '>' + pfx('-d-Sb'));
     a.after(elem);
     return true;
   };
+
+  function enhanceRow(elem, flight) {
+    var line = document.createElement('div');
+    elem.appendChild(line);
+    // Legroom.
+    if (settings.legroom) {
+      line.appendChild(legroomIcon(flight));
+    }
+    // Carry-on.
+    if (settings.carryOn) {
+      line.appendChild(binaryIcon(
+          flight.carry_on_restricted,
+          'legroom-carryon', cpfx('-d-kb'), 'none',
+          'Restricted Carry-On'));
+    }
+    // Aircraft.
+    if (settings.aircraft) {
+      let aircraft = document.createElement('span');
+      aircraft.classList.add('aircraft');
+      aircraft.textContent = flight.aircraft;
+      aircraft.title = aircraftMap.get(flight.aircraft);
+      line.appendChild(aircraft);
+    }
+    // Wifi
+    if (settings.wifi) {
+      line.appendChild(binaryIcon(
+        flight.wifi, 'legroom-wifi', cpfx('-d-kc'), cpfx('-d-qb')));
+    }
+    // Power
+    if (settings.power) {
+      line.appendChild(powerIcon(flight.power, flight.usb));
+    }
+  };
+
+  function legroomIcon(flight) {
+    let legroom = document.createElement('div');
+    legroom.classList.add('legs');
+    let text = (settings.inch) && flight.inch || flight.cm;
+    if (!text) {
+      text = flight.seat_description || '?';
+    }
+    legroom.textContent = text;
+    legroom.title = 'Legroom';
+    let green = (flight.seat_type == '4');
+    let yellow = (flight.seat_type == '3');
+    if (green) {
+      legroom.classList.add('green');
+    }
+    if (yellow) {
+      legroom.classList.add('yellow');
+    }
+    return legroom;
+  };
+
+  function binaryIcon(flag, elemClass, onClass, offClass, title) {
+    let icon = document.createElement('div');
+    icon.classList.add(elemClass);
+    if (flag) {
+      icon.classList.add(onClass);
+    } else {
+      icon.classList.add(offClass);
+    }
+    return icon;
+  }
+
+  function powerIcon(outlet, usb) {
+    let icon = document.createElement('div');
+    icon.classList.add('power');
+    if (outlet && usb) {
+      icon.classList.add('outlet-usb');
+    } else if (outlet) {
+      icon.classList.add('outlet');
+    } else if (usb) {
+      icon.classList.add('usb');
+    } else {
+      icon.classList.add('none');
+    }
+    return icon;
+  }
 
   var cachedItinerary = new Map();
 
@@ -322,6 +415,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
       mutations.forEach(function(m) {
         if (m.type == 'attributes' && m.attributeName == 'class') {
           var c = findMatchingClass(m.target, /.+-f-w/);
+          if (!c) return;
           callback(c.match(/[A-Z]+/)[0]);
           o.disconnect(); // No need to observe anymore.
         }
@@ -331,7 +425,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
 
   window.addEventListener('load', function() {
     if (window.location.host.match(/\.com$/)) {
-      isInch = true;
+      settings.inch = true;
     }
     observeForClassPrefix(function(p) {
       prefix = p;
@@ -375,21 +469,36 @@ console.log('Enhancing Google Flights search with amenities extension.');
     }
     return null;
   };
- 
+
+  var COLUMN_WIDTHS = {
+    legroom: 96,
+    aircraft: 42,
+    carryOn: 25,
+    wifi: 25,
+    power: 23
+  };
+
   var injectStyles = function() {
     var styleElem = document.createElement('style');
     document.head.appendChild(styleElem);
 
     var ss = styleElem.sheet;
 
+    let enhWidth = Object.keys(COLUMN_WIDTHS).reduce((total, col) => {
+      return total + ((settings[col] && COLUMN_WIDTHS[col]) || 0);
+    }, 0);
+    let layoutWidth = 840 + enhWidth;
+    let middleW = 650 + enhWidth;
+    
     var rules = [
-        'table.pfx-f-i {width: 940px}', // Layout table.
-        'div.pfx-f-e {width: 750px}', // Middle column.
+        'table.pfx-f-i {width: ' + layoutWidth + 'px}', // Layout table.
+        'div.pfx-f-e {width: ' + middleW + 'px}', // Middle layout.
         /* Columns. */ 
-        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Bb { width: 15.2%; }',
-        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-ac { width: 36.2%; }',
-        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Jb { width: 15.5%; }',
-        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Sb { width: 17.1%; }',
+        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Bb { width:' + 9900/middleW + '%; }',
+        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-ac { width:' + 25500/middleW + '%; }',
+        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Jb { width:' + 13300/middleW + '%; }',
+        '.pfx-d-Lb>.pfx-d-X>div.pfx-d-Sb { width:' + 13700/middleW + '%; }',
+        '.legroom-s {width:' + enhWidth + 'px}', // Enhancement column.
     ];
 
     rules.forEach(function(rule) {
