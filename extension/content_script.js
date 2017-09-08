@@ -12,6 +12,14 @@
   (document.head || document.documentElement).appendChild(l);
 })();
 
+// Pass in chrome extension ID.
+(function() {
+  let sharedElem = document.body.querySelector('.' + chrome.runtime.id);
+  sharedElem = document.createElement('div');
+  sharedElem.classList.add('shared-elem');
+  sharedElem.textContent = chrome.runtime.id;
+  document.body.append(sharedElem);
+})();
 
 window.addEventListener('load', function() {
   chrome.runtime.sendMessage(null, {type:'activate'});

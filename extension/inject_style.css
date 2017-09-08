@@ -75,4 +75,6 @@ a.legroom-notice:hover {
   background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAAHCAYAAADTcMcaAAAAWklEQVR42mNgQAM7duzw3759+2Eg/g7E/6G4ngEXAGrwRlKIjJcD8XwYZgASDjC8bdu20zg0gRTXwzADmuQ3HJpQnYdsExBfIsomNAPiifITlsDIBko8xuc8AAABxYsr3GhDAAAAAElFTkSuQmCC) center no-repeat;
   background-size: 13px 7px;
 }
-
+.shared-elem {
+  display: none;
+}

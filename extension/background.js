@@ -1,5 +1,42 @@
 let activeTabIds = new Set();
 
+// Connection to webpages.
+let pageConnectionManager = (function() {
+  let activeConnections = [];
+
+  function connectListener(port) {
+    if (port.name == 'injected') {
+      activeConnections.push(port);
+      port.onDisconnect.addListener(unregisterPort);
+    } else {
+      port.disconnect();
+    }
+  }
+
+  function unregisterPort(port) {
+    for (let i = activeConnections.length - 1; i >= 0; i--) {
+      if (activeConnections[i] === port) {
+        activeConnections.splice(i, 1);
+      }
+    }
+  }
+
+  /* Send to all active connections. */
+  function postMessage(message) {
+    activeConnections.forEach(function(port) {
+      port.postMessage(message);
+    });
+  }
+
+  return {
+    postMessage: postMessage,
+    connectListener: connectListener
+  };
+})();
+chrome.runtime.onConnectExternal
+    .addListener(pageConnectionManager.connectListener);
+
+
 chrome.runtime.onMessage.addListener(
     function(message, sender, responseFn) {
       if (!message.type) {
@@ -27,8 +64,13 @@ chrome.runtime.onMessage.addListener(
           }
         });
       }
+
       if (message.type == 'is_active' && message.tab_id) {
         responseFn(activeTabIds.has(message.tab_id));
+      }
+
+      if (message.type == 'settings_updated') {
+        pageConnectionManager.postMessage(message);
       }
     });
 
@@ -52,4 +94,5 @@ function generateUniqueId() {
 }
 chrome.runtime.onInstalled.addListener(generateUniqueId);
 chrome.runtime.onStartup.addListener(generateUniqueId);
+
 

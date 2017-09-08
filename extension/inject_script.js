@@ -120,7 +120,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     retVal.flight_number = flightData[6];
     retVal.aircraft = flightData[9];
     let delayInfo = flightData[11];
-    console.log(flightData);
     if (delayInfo) {
       retVal.delayInfo = {
         by_15min_pct: delayInfo[1],
@@ -427,6 +426,8 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (window.location.host.match(/\.com$/)) {
       settings.inch = true;
     }
+    setupExtensionConnection();
+
     observeForClassPrefix(function(p) {
       prefix = p;
       injectStyles();
@@ -506,6 +507,35 @@ console.log('Enhancing Google Flights search with amenities extension.');
       ss.insertRule(rule, ss.cssRules.length);
     });
   };
+
+  function setupExtensionConnection() {
+    let elem = document.querySelector('.shared-elem');
+    if (!elem) {
+      console.log('Extension ID element is missing.');
+      return;
+    }
+    let extensionId = elem.textContent;
+    if (!extensionId) {
+      console.log('Extension ID is missing.');
+      return;
+    }
+    // Listen to events from extension.
+    let port = chrome.runtime.connect(extensionId, { name: 'injected' });
+    port.onMessage.addListener(function(message) {
+      if (message.type == 'settings_updated') {
+        updateSettings(message.settings);
+      }
+    });
+    port.onDisconnect.addListener(function() {
+      // Reopen again.
+      window.setTimeout(setupExtensionConnection, 500);
+    });
+  }
+
+  function updateSettings(newSettings) {
+    console.log(newSettings);
+    settings = newSettings;
+  }
 
 })();
 
