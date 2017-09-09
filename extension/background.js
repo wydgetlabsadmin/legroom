@@ -1,5 +1,8 @@
 let activeTabIds = new Set();
 
+// "Storage" for setting when local storage is not available.
+let ephemerealSetting = null;
+
 // Connection to webpages.
 let pageConnectionManager = (function() {
   let activeConnections = [];
@@ -69,8 +72,13 @@ chrome.runtime.onMessage.addListener(
         responseFn(activeTabIds.has(message.tab_id));
       }
 
-      if (message.type == 'settings_updated') {
+      if (message.type == 'setting_updated') {
+        saveSetting(message.setting);
         pageConnectionManager.postMessage(message);
+      }
+
+      if (message.type == 'fetch_setting') {
+        responseFn(loadSetting());
       }
     });
 
@@ -95,4 +103,58 @@ function generateUniqueId() {
 chrome.runtime.onInstalled.addListener(generateUniqueId);
 chrome.runtime.onStartup.addListener(generateUniqueId);
 
+
+function setupDefaultSetting() {
+  if (!window.localStorage) {
+    // Local storage unsupported. Ephemereal state then.
+    ephemerealSetting = getDefaultSetting();
+    return;
+  }
+  let storedSetting = loadSetting();
+  if (storedSetting) {
+    if (storedSetting.version == 1) {
+      return; // Latest. Do nothing.
+    }
+  }
+  saveSetting(getDefaultSetting());
+}
+chrome.runtime.onInstalled.addListener(setupDefaultSetting);
+chrome.runtime.onStartup.addListener(setupDefaultSetting);
+
+function getDefaultSetting() {
+  return {
+    version: 1,
+    legroom: true,
+    carryon: true,
+    aircraft: false,
+    wifi: false,
+    power: false
+  };
+}
+
+function loadSetting() {
+  if (window.localStorage) {
+    try {
+      return JSON.parse(window.localStorage.getItem('setting'));
+    } catch (e) {
+      // Bad setting or non-JSON. Just replace it.
+      return null;
+    }
+  }
+  // Local storage unsupported. Ephemereal state then.
+  if (!ephemerealSetting) {
+    ephemerealSetting = getDefaultSetting();
+  }
+  return ephemerealSetting;
+}
+
+function saveSetting(newSetting) {
+  console.log(newSetting);
+  if (window.localStorage) {
+    window.localStorage.setItem('setting', JSON.stringify(newSetting));
+    return;
+  }
+  // Local storage unsupported. Ephemereal state then.
+  ephemerealSetting = newSetting;
+}
 

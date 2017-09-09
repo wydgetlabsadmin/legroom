@@ -5,7 +5,11 @@ function init() {
         { active: true, currentWindow: true },
         onActiveTabResult);
   }
-  new SettingControls(cssQuery_('.info .controls'));
+  chrome.runtime.sendMessage(
+      { type: 'fetch_setting' },
+      function(setting) {
+        new SettingControls(setting, cssQuery_('.info .controls'));
+      });
 }
 
 function onActiveTabResult(tabs) {
@@ -38,28 +42,25 @@ function displayInactivePanel() {
 }
 
 class SettingControls {
-  constructor(container) {
-    this.settings_ = {};
-    // Defaults.
-    this.settings_['legroom'] = true;
-    this.settings_['carryon'] = true;
+  constructor(setting, container) {
+    this.setting_ = setting;
     // Init each control.
     container.querySelectorAll('input[type="checkbox"]')
       .forEach(input => {
-        if (this.settings_[input.name]) {
-          input.checked = this.settings_[input.name];
+        if (this.setting_[input.name]) {
+          input.checked = this.setting_[input.name];
         } else {
-          this.settings_[input.name] = false;
+          this.setting_[input.name] = false;
         }
         input.addEventListener('change', this.handleChange_.bind(this));
       }, this);
   }
 
   handleChange_(evt) {
-    this.settings_[evt.target.name] = evt.target.checked;
+    this.setting_[evt.target.name] = evt.target.checked;
     console.log('update!');
     chrome.runtime.sendMessage(
-        { type: 'settings_updated', settings: this.settings_ });
+        { type: 'setting_updated', setting: this.setting_ });
   }
 }
 
