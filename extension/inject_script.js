@@ -5,13 +5,13 @@ console.log('Enhancing Google Flights search with amenities extension.');
   // from #root.
   var prefix = '';
 
-  // User settings.
+  // User settings. Default values to use when persisted storage fail.
   let settings = {
     legroom: true,
-    aircraft: true,
+    aircraft: false,
     carryOn: true,
-    wifi: true,
-    power: true,
+    wifi: false,
+    power: false,
     inch: false
   };
 
@@ -522,8 +522,8 @@ console.log('Enhancing Google Flights search with amenities extension.');
     // Listen to events from extension.
     let port = chrome.runtime.connect(extensionId, { name: 'injected' });
     port.onMessage.addListener(function(message) {
-      if (message.type == 'settings_updated') {
-        updateSettings(message.settings);
+      if (message.type == 'setting_updated') {
+        updateSetting(message.setting);
       }
     });
     port.onDisconnect.addListener(function() {
@@ -532,10 +532,9 @@ console.log('Enhancing Google Flights search with amenities extension.');
     });
   }
 
-  function updateSettings(newSettings) {
-    console.log(newSettings);
-    settings = newSettings;
+  function updateSetting(newSetting) {
+    console.log(newSetting);
+    settings = newSetting;
   }
-
 })();
 
