@@ -11,8 +11,9 @@ let pageConnectionManager = (function() {
     if (port.name == 'injected') {
       activeConnections.push(port);
       port.onDisconnect.addListener(unregisterPort);
+      sendInit(port);
     } else {
-      port.disconnect();
+      port.disconnect(); // Unknown port.
     }
   }
 
@@ -156,5 +157,9 @@ function saveSetting(newSetting) {
   }
   // Local storage unsupported. Ephemereal state then.
   ephemerealSetting = newSetting;
+}
+
+function sendInit(port) {
+  port.postMessage({ type: 'setting_updated', setting: loadSetting() });
 }
 
