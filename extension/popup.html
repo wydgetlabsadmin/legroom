@@ -3,15 +3,16 @@
   <head>
   <link rel="stylesheet" href="popup.css">
   </head>
-  <body>
+  <body class="active">
     <h1>Legrooms for Google Flights</h1>
     <div class="active info">
-      Displaying:
-      <ul>
-        <li>Legroom space or seat type.</li>
-        <li>Restricted carry-on status.</li>
-      </ul>
-      on search results.
+      <div class="controls">
+        <input type="checkbox" name="legroom"/><label for="legroom">Legroom</label>
+        <input type="checkbox" name="carryon"/><label for="carryon">Carry-on Restriction</label>
+        <input type="checkbox" name="aircraft"/><label for="aircraft">Aircraft Code</label>
+        <input type="checkbox" name="wifi"/><label for="wifi">WiFi</label>
+        <input type="checkbox" name="power"/><label for="power">Power Outlets</label>
+      </div>
     </div>
     <div class="inactive">
       <a href="https://www.google.com/flights" target="_blank">
@@ -19,8 +20,8 @@
       </a>
     </div>
     <footer>
-      <a href="http://feedback.taco5.com" target="_blank">Send Feedback</a>
-      <p>&copy; 2017 dbugger@taco5</p>
+      <p><a href="http://feedback.taco5.com" target="_blank">Send Feedback</a></p>
+      <p class="copyright">&copy; 2017 dbugger@taco5</p>
     </footer>
   </body>
   <script src="popup.js" language="javascript"></script>

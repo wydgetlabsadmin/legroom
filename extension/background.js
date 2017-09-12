@@ -1,5 +1,46 @@
 let activeTabIds = new Set();
 
+// "Storage" for setting when local storage is not available.
+let ephemerealSetting = null;
+
+// Connection to webpages.
+let pageConnectionManager = (function() {
+  let activeConnections = [];
+
+  function connectListener(port) {
+    if (port.name == 'injected') {
+      activeConnections.push(port);
+      port.onDisconnect.addListener(unregisterPort);
+      sendInit(port);
+    } else {
+      port.disconnect(); // Unknown port.
+    }
+  }
+
+  function unregisterPort(port) {
+    for (let i = activeConnections.length - 1; i >= 0; i--) {
+      if (activeConnections[i] === port) {
+        activeConnections.splice(i, 1);
+      }
+    }
+  }
+
+  /* Send to all active connections. */
+  function postMessage(message) {
+    activeConnections.forEach(function(port) {
+      port.postMessage(message);
+    });
+  }
+
+  return {
+    postMessage: postMessage,
+    connectListener: connectListener
+  };
+})();
+chrome.runtime.onConnectExternal
+    .addListener(pageConnectionManager.connectListener);
+
+
 chrome.runtime.onMessage.addListener(
     function(message, sender, responseFn) {
       if (!message.type) {
@@ -27,8 +68,21 @@ chrome.runtime.onMessage.addListener(
           }
         });
       }
+
       if (message.type == 'is_active' && message.tab_id) {
         responseFn(activeTabIds.has(message.tab_id));
+      }
+
+      if (message.type == 'setting_updated') {
+        saveSetting(message.setting);
+        pageConnectionManager.postMessage(message);
+      }
+
+      if (message.type == 'fetch_setting') {
+        if (message.caller == 'popup') {
+          incrementPopupCounter();
+        }
+        responseFn(loadSetting());
       }
     });
 
@@ -52,4 +106,69 @@ function generateUniqueId() {
 }
 chrome.runtime.onInstalled.addListener(generateUniqueId);
 chrome.runtime.onStartup.addListener(generateUniqueId);
+
+
+function setupDefaultSetting() {
+  if (!window.localStorage) {
+    // Local storage unsupported. Ephemereal state then.
+    ephemerealSetting = getDefaultSetting();
+    return;
+  }
+  let storedSetting = loadSetting();
+  if (storedSetting) {
+    if (storedSetting.version == 1) {
+      return; // Latest. Do nothing.
+    }
+  }
+  saveSetting(getDefaultSetting());
+}
+chrome.runtime.onInstalled.addListener(setupDefaultSetting);
+chrome.runtime.onStartup.addListener(setupDefaultSetting);
+
+function getDefaultSetting() {
+  return {
+    version: 1,
+    legroom: true,
+    carryon: true,
+    aircraft: false,
+    wifi: false,
+    power: false
+  };
+}
+
+function loadSetting() {
+  if (window.localStorage) {
+    try {
+      return JSON.parse(window.localStorage.getItem('setting'));
+    } catch (e) {
+      // Bad setting or non-JSON. Just replace it.
+      return null;
+    }
+  }
+  // Local storage unsupported. Ephemereal state then.
+  if (!ephemerealSetting) {
+    ephemerealSetting = getDefaultSetting();
+  }
+  return ephemerealSetting;
+}
+
+function saveSetting(newSetting) {
+  if (window.localStorage) {
+    window.localStorage.setItem('setting', JSON.stringify(newSetting));
+    return;
+  }
+  // Local storage unsupported. Ephemereal state then.
+  ephemerealSetting = newSetting;
+}
+
+function sendInit(port) {
+  port.postMessage({ type: 'setting_updated', setting: loadSetting() });
+}
+
+function incrementPopupCounter() {
+  let count = window.localStorage.getItem('popup_counter') || 0;
+  count = Number(count) || 0;
+  count = count + 1;
+  window.localStorage.setItem('popup_counter', count);
+}
 

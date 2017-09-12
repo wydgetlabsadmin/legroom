@@ -1,15 +1,23 @@
 
 function init() {
-  chrome.tabs.query(
-      { active: true, currentWindow: true },
-      onActiveTabResult);
+  if (chrome.tabs) {
+    chrome.tabs.query(
+        { active: true, currentWindow: true },
+        onActiveTabResult);
+  }
 }
 
 function onActiveTabResult(tabs) {
   if (!tabs || !tabs[0]) {
     return; // Do nothing.
   }
-  checkFlightTab(tabs[0].id, displayActivePanel, displayInactivePanel);
+  chrome.runtime.sendMessage(
+      { type: 'fetch_setting', caller: 'popup' },
+      function(setting) {
+        checkFlightTab(
+            tabs[0].id, displayActivePanel, displayInactivePanel);
+        new SettingControls(setting, cssQuery_('.info .controls'));
+      });
 }
 
 function checkFlightTab(tabId, positiveCallback, negativeCallback) {
@@ -32,6 +40,33 @@ function displayActivePanel() {
 function displayInactivePanel() {
   var body = document.querySelector('body');
   body.classList.remove('active');
+}
+
+class SettingControls {
+  constructor(setting, container) {
+    this.setting_ = setting;
+    // Init each control.
+    container.querySelectorAll('input[type="checkbox"]')
+      .forEach(input => {
+        if (this.setting_[input.name]) {
+          input.checked = this.setting_[input.name];
+        } else {
+          this.setting_[input.name] = false;
+        }
+        input.addEventListener('change', this.handleChange_.bind(this));
+      }, this);
+  }
+
+  handleChange_(evt) {
+    this.setting_[evt.target.name] = evt.target.checked;
+    console.log('update!');
+    chrome.runtime.sendMessage(
+        { type: 'setting_updated', setting: this.setting_ });
+  }
+}
+
+function cssQuery_(selector) {
+  return document.querySelector(selector);
 }
 
 init();

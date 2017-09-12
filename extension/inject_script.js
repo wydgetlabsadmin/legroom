@@ -5,13 +5,13 @@ console.log('Enhancing Google Flights search with amenities extension.');
   // from #root.
   var prefix = '';
 
-  // User settings.
+  // User settings. Default values to use when persisted storage fail.
   let settings = {
     legroom: true,
-    aircraft: true,
-    carryOn: true,
-    wifi: true,
-    power: true,
+    aircraft: false,
+    carryon: true,
+    wifi: false,
+    power: false,
     inch: false
   };
 
@@ -21,7 +21,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
   function cpfx(s) {
     if (s.map) {
       return s.map(function(a) {
-        return '.' + prefix + a;
+        return prefix + a;
       });
     }
     return prefix + s;
@@ -120,7 +120,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     retVal.flight_number = flightData[6];
     retVal.aircraft = flightData[9];
     let delayInfo = flightData[11];
-    console.log(flightData);
     if (delayInfo) {
       retVal.delayInfo = {
         by_15min_pct: delayInfo[1],
@@ -212,7 +211,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
       line.appendChild(legroomIcon(flight));
     }
     // Carry-on.
-    if (settings.carryOn) {
+    if (settings.carryon) {
       line.appendChild(binaryIcon(
           flight.carry_on_restricted,
           'legroom-carryon', cpfx('-d-kb'), 'none',
@@ -427,6 +426,8 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (window.location.host.match(/\.com$/)) {
       settings.inch = true;
     }
+    setupExtensionConnection();
+
     observeForClassPrefix(function(p) {
       prefix = p;
       injectStyles();
@@ -453,9 +454,14 @@ console.log('Enhancing Google Flights search with amenities extension.');
 
       });
     }).observe(document.body, { childList: true, subtree: true });
-
   });
- 
+
+  function queryFlightNodeAll() {
+    let selector = pfx('-d-Lb') +
+        ':not(' + pfx('-d-X') + '):not(' +  pfx('-d-cc') + ')';
+    return [...document.querySelectorAll(selector)];
+  }
+
   // Utility functions.
   var findMatchingClass = function(elem, regex) {
     if (!elem.classList) {
@@ -473,13 +479,19 @@ console.log('Enhancing Google Flights search with amenities extension.');
   var COLUMN_WIDTHS = {
     legroom: 96,
     aircraft: 42,
-    carryOn: 25,
+    carryon: 25,
     wifi: 25,
     power: 23
   };
 
-  var injectStyles = function() {
-    var styleElem = document.createElement('style');
+  function injectStyles() {
+    let styleElem = document.getElementById('legroomStyle');
+    if (styleElem) {
+      // Cleanup existing style.
+      styleElem.parentNode.removeChild(styleElem);
+    }
+    styleElem = document.createElement('style');
+    styleElem.id = 'legroomStyle';
     document.head.appendChild(styleElem);
 
     var ss = styleElem.sheet;
@@ -507,5 +519,36 @@ console.log('Enhancing Google Flights search with amenities extension.');
     });
   };
 
+  function setupExtensionConnection() {
+    let elem = document.querySelector('.shared-elem');
+    if (!elem) {
+      console.log('Extension ID element is missing.');
+      return;
+    }
+    let extensionId = elem.textContent;
+    if (!extensionId) {
+      console.log('Extension ID is missing.');
+      return;
+    }
+    // Listen to events from extension.
+    let port = chrome.runtime.connect(extensionId, { name: 'injected' });
+    port.onMessage.addListener(function(message) {
+      if (message.type == 'setting_updated') {
+        updateSetting(message.setting);
+      }
+    });
+    port.onDisconnect.addListener(function() {
+      // Reopen again.
+      window.setTimeout(setupExtensionConnection, 500);
+    });
+  }
+
+  function updateSetting(newSetting) {
+    settings = newSetting;
+    queryFlightNodeAll().forEach(node => {
+      updateNode(node);
+    });
+    injectStyles();
+  }
 })();
 
