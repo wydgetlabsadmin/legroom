@@ -22,10 +22,12 @@
 })();
 
 window.addEventListener('load', function() {
-  chrome.runtime.sendMessage(null, {type:'activate'});
+  chrome.runtime.sendMessage(
+      chrome.runtime.id, { type:'activate' });
 });
 
 window.addEventListener('unload', function() {
-  chrome.runtime.sendMessage(null, {type:'disactivate'});
+  chrome.runtime.sendMessage(
+      chrome.runtime.id, { type:'disactivate' });
 });
 

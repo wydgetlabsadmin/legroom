@@ -544,7 +544,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
   }
 
   function updateSetting(newSetting) {
-    console.log(newSetting);
     settings = newSetting;
     queryFlightNodeAll().forEach(node => {
       updateNode(node);

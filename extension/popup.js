@@ -5,18 +5,19 @@ function init() {
         { active: true, currentWindow: true },
         onActiveTabResult);
   }
-  chrome.runtime.sendMessage(
-      { type: 'fetch_setting' },
-      function(setting) {
-        new SettingControls(setting, cssQuery_('.info .controls'));
-      });
 }
 
 function onActiveTabResult(tabs) {
   if (!tabs || !tabs[0]) {
     return; // Do nothing.
   }
-  checkFlightTab(tabs[0].id, displayActivePanel, displayInactivePanel);
+  chrome.runtime.sendMessage(
+      { type: 'fetch_setting', caller: 'popup' },
+      function(setting) {
+        checkFlightTab(
+            tabs[0].id, displayActivePanel, displayInactivePanel);
+        new SettingControls(setting, cssQuery_('.info .controls'));
+      });
 }
 
 function checkFlightTab(tabId, positiveCallback, negativeCallback) {

@@ -79,6 +79,9 @@ chrome.runtime.onMessage.addListener(
       }
 
       if (message.type == 'fetch_setting') {
+        if (message.caller == 'popup') {
+          incrementPopupCounter();
+        }
         responseFn(loadSetting());
       }
     });
@@ -150,7 +153,6 @@ function loadSetting() {
 }
 
 function saveSetting(newSetting) {
-  console.log(newSetting);
   if (window.localStorage) {
     window.localStorage.setItem('setting', JSON.stringify(newSetting));
     return;
@@ -161,5 +163,12 @@ function saveSetting(newSetting) {
 
 function sendInit(port) {
   port.postMessage({ type: 'setting_updated', setting: loadSetting() });
+}
+
+function incrementPopupCounter() {
+  let count = window.localStorage.getItem('popup_counter') || 0;
+  count = Number(count) || 0;
+  count = count + 1;
+  window.localStorage.setItem('popup_counter', count);
 }
 
