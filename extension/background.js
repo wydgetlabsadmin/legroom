@@ -8,7 +8,6 @@ let pageConnectionManager = (function() {
   let activeConnections = [];
 
   function connectListener(port) {
-    console.log(port);
     if (port.name == 'content') {
       activeConnections.push(port);
       port.onDisconnect.addListener(unregisterPort);
