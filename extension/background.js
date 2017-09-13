@@ -8,7 +8,8 @@ let pageConnectionManager = (function() {
   let activeConnections = [];
 
   function connectListener(port) {
-    if (port.name == 'injected') {
+    console.log(port);
+    if (port.name == 'content') {
       activeConnections.push(port);
       port.onDisconnect.addListener(unregisterPort);
       sendInit(port);
@@ -37,7 +38,7 @@ let pageConnectionManager = (function() {
     connectListener: connectListener
   };
 })();
-chrome.runtime.onConnectExternal
+chrome.runtime.onConnect
     .addListener(pageConnectionManager.connectListener);
 
 

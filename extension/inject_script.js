@@ -426,7 +426,8 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (window.location.host.match(/\.com$/)) {
       settings.inch = true;
     }
-    setupExtensionConnection();
+    //setupExtensionConnection();
+    setupWindowMessaging();
 
     observeForClassPrefix(function(p) {
       prefix = p;
@@ -519,28 +520,17 @@ console.log('Enhancing Google Flights search with amenities extension.');
     });
   };
 
-  function setupExtensionConnection() {
-    let elem = document.querySelector('.shared-elem');
-    if (!elem) {
-      console.log('Extension ID element is missing.');
-      return;
-    }
-    let extensionId = elem.textContent;
-    if (!extensionId) {
-      console.log('Extension ID is missing.');
-      return;
-    }
-    // Listen to events from extension.
-    let port = chrome.runtime.connect(extensionId, { name: 'injected' });
-    port.onMessage.addListener(function(message) {
-      if (message.type == 'setting_updated') {
+  function setupWindowMessaging() {
+    // Start listening first.
+    window.addEventListener('message', (messageEvent) => {
+      let message = messageEvent.data;
+      if (message && message.type == 'legroom_setting'
+          && message.action == 'setting') {
         updateSetting(message.setting);
       }
     });
-    port.onDisconnect.addListener(function() {
-      // Reopen again.
-      window.setTimeout(setupExtensionConnection, 500);
-    });
+    window.postMessage(
+        { type: 'legroom_setting', action: 'fetch' }, window.origin);
   }
 
   function updateSetting(newSetting) {
