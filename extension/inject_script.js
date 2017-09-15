@@ -228,7 +228,8 @@ console.log('Enhancing Google Flights search with amenities extension.');
     // Wifi
     if (settings.wifi) {
       line.appendChild(binaryIcon(
-        flight.wifi, 'legroom-wifi', cpfx('-d-kc'), cpfx('-d-qb')));
+        flight.wifi, 'legroom-wifi', cpfx('-d-kc'), cpfx('-d-qb'),
+        'WiFi'));
     }
     // Power
     if (settings.power) {
@@ -259,6 +260,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
   function binaryIcon(flag, elemClass, onClass, offClass, title) {
     let icon = document.createElement('div');
     icon.classList.add(elemClass);
+    icon.title = title;
     if (flag) {
       icon.classList.add(onClass);
     } else {
@@ -272,12 +274,16 @@ console.log('Enhancing Google Flights search with amenities extension.');
     icon.classList.add('power');
     if (outlet && usb) {
       icon.classList.add('outlet-usb');
+      icon.title = 'Outlet + USB';
     } else if (outlet) {
       icon.classList.add('outlet');
+      icon.title = 'Outlet only';
     } else if (usb) {
       icon.classList.add('usb');
+      icon.title = 'USB only';
     } else {
-      icon.classList.add('none');
+      icon.classList.add('none');  
+      icon.title = 'No power';
     }
     return icon;
   }
