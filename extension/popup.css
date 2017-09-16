@@ -60,6 +60,12 @@ a:hover {
   content: '\a';
   white-space: pre;
 }
+.info .metric label:after {
+  content: '';
+}
+.info .metric p {
+  line-height: 250%;
+}
 footer {
   background-color: #bdbdbd;
   color: hsla(0,0%,0%,0.75);
