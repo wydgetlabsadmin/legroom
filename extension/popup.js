@@ -45,7 +45,7 @@ function displayInactivePanel() {
 class SettingControls {
   constructor(setting, container) {
     this.setting_ = setting;
-    // Init each control.
+    // Init each checkbox control.
     container.querySelectorAll('input[type="checkbox"]')
       .forEach(input => {
         if (this.setting_[input.name]) {
@@ -55,11 +55,37 @@ class SettingControls {
         }
         input.addEventListener('change', this.handleChange_.bind(this));
       }, this);
+    // Init inch toggle.
+    container.querySelectorAll('input[type="radio"][name="inch"]')
+      .forEach(radio => {
+        if (radio.id == 'inchTrue') {
+          radio.checked = !!this.setting_.inch;
+        } else if (radio.id == 'inchFalse') {
+          radio.checked = !this.setting_.inch;
+        } else {
+          console.log('Found unknown radio button. ' + radio);
+          return;
+        }
+        radio.addEventListener(
+            'change', this.handleInchChange_.bind(this));
+      });
   }
 
   handleChange_(evt) {
     this.setting_[evt.target.name] = evt.target.checked;
-    console.log('update!');
+    chrome.runtime.sendMessage(
+        { type: 'setting_updated', setting: this.setting_ });
+  }
+
+  handleInchChange_(evt) {
+    if (!evt.target.checked) {
+      return; // Ignore this.
+    }
+    if (evt.target.id == 'inchTrue') {
+      this.setting_.inch = true;
+    } else if (evt.target.id == 'inchFalse') {
+      this.setting_.inch = false;
+    }
     chrome.runtime.sendMessage(
         { type: 'setting_updated', setting: this.setting_ });
   }

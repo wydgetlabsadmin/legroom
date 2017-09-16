@@ -79,10 +79,18 @@ chrome.runtime.onMessage.addListener(
       }
 
       if (message.type == 'fetch_setting') {
+        let setting = loadSetting();
         if (message.caller == 'popup') {
           incrementPopupCounter();
+        } else {
+          if (setting.inch === undefined) {
+            // inch not set. Let's default it. inch = true
+            // for google.com, false otherwise.
+            setting.inch = !!sender.url.match(/google.com\//);
+            saveSetting(setting);
+          }
         }
-        responseFn(loadSetting());
+        responseFn(setting);
       }
     });
 
@@ -126,6 +134,7 @@ chrome.runtime.onInstalled.addListener(setupDefaultSetting);
 chrome.runtime.onStartup.addListener(setupDefaultSetting);
 
 function getDefaultSetting() {
+  // inch is omitted so it will be filled in later.
   return {
     version: 1,
     legroom: true,
