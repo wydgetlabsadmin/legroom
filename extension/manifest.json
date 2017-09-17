@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
 
-  "name": "Legrooms for Google Flights (Test)",
+  "name": "Legrooms for Google Flights",
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legroom and carry-on restrictions information on search listing.",
   "version": "1.7.5",
