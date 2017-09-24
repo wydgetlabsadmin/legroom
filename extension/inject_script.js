@@ -421,7 +421,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
         if (m.type == 'attributes' && m.attributeName == 'class') {
           var c = findMatchingClass(m.target, /.+-f-w/);
           if (!c) return;
-          callback(c.match(/[A-Z]+/)[0]);
+          callback(c.match(/[A-Z0-9]+/)[0]);
           o.disconnect(); // No need to observe anymore.
         }
       });
