@@ -1,0 +1,37 @@
+.legroom-row-extend {
+  background-color: #eee;
+  color: rgba(0, 0, 0, .54);
+  display: flex;
+  flex: 0 0;
+  font-size: 13px;
+  padding: 10px 8px;
+  position: relative;
+}
+
+.legroom-row-extend .seat {
+  flex: 1 1;
+}
+
+.legroom-row-extend .leg {
+  padding: 8px 16px 0 8px;
+  white-space: nowrap;
+}
+
+.legroom-row-extend .seat .leg {
+  background-size: 16px;
+  background-position: left 7px;
+  background-repeat: no-repeat;
+  padding: 8px 14px 0 18px;
+}
+
+.legroom-row-extend .wifi, 
+.legroom-row-extend .power {
+  width: 24px;
+}
+.legroom-row-extend .wifi .leg, 
+.legroom-row-extend .power .leg {
+  background-size: 16px;
+  background-position: left 7px;
+  background-repeat: no-repeat;
+  height: 12px;
+}

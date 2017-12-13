@@ -432,7 +432,6 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (window.location.host.match(/\.com$/)) {
       settings.inch = true;
     }
-    //setupExtensionConnection();
     setupWindowMessaging();
 
     observeForClassPrefix(function(p) {
