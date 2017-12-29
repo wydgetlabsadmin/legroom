@@ -18,6 +18,11 @@ function observeDom() {
 
   function handleAddedNode(node) {
     if (node.classList &&
+        node.classList.contains('gws-flights-results__heading-disclaimer')) {
+      handleHeader(node);
+      return;
+    }
+    if (node.classList &&
         node.classList.contains('gws-flights-widgets-expandablecard__body')) {
       handleExpandableCard(node);
       return;
@@ -28,6 +33,19 @@ function observeDom() {
       }
     }
   }
+}
+
+function handleHeader(header) {
+  header = header ||
+      document.querySelector('.gws-flights-results__heading-disclaimer');
+  if (!header) {
+    return;  // No need to do anything.
+  }
+  // Append spacer.
+  let div = document.createElement('div');
+  div.classList.add('legroom-header');
+  div.innerText = 'Enhanced by Legroom for Google Flights.';
+  header.appendChild(div);
 }
 
 function handleExpandableCard(node) {
@@ -133,6 +151,9 @@ function buildAmenitiesElement(legs, amenityName) {
     if (amenity) {
       if (amenity.text) {
         leg.innerText = amenity.text;
+        if (amenity.text && amenity.text.length > 10) {
+          leg.title = amenity.text;
+        }
       }
       if (amenity.cssClass) {
         leg.classList.add(amenity.cssClass);
@@ -154,6 +175,7 @@ function queryAndExtend() {
   let nodes = document.querySelectorAll('.gws-flights-widgets-expandablecard__body');
   if (nodes.length > 0) {
     nodes.forEach(handleExpandableCard);
+    handleHeader();
   } else {
     observeDom();
   }

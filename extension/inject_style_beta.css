@@ -13,7 +13,7 @@
 }
 
 .legroom-row-extend .leg {
-  padding: 8px 16px 0 8px;
+  padding: 8px 8px 2px;
   white-space: nowrap;
 }
 
@@ -35,3 +35,21 @@
   background-repeat: no-repeat;
   height: 12px;
 }
+.legroom-row-extend .aircraft {
+  width: 8em;
+}
+.legroom-row-extend .aircraft .leg {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.legroom-header {
+  background: #e0e0e0;
+  color: rgba(0, 0, 0, .54);
+  font-size: 11px;
+  margin-left: -135px;
+  padding: 16px 8px;
+  text-align: right;
+  width: 213px;
+}
+
