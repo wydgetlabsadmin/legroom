@@ -71,6 +71,9 @@ function handleExpandableCard(node) {
   });
 
   let rowLi = node.closest('li.gws-flights-results__result-item');
+  if (!rowLi) {
+    return;
+  }
   let row = rowLi.querySelector('div.gws-flights-results__itinerary-card-summary');
   extendRow(row, legs);
 }

@@ -1,17 +1,29 @@
 
+function isBeta() {
+  return window.location.pathname == '/flights/beta';
+}
+
+  
 (function() {
-  var s = document.createElement('script');
-  let script = (window.location.pathname == '/flights/beta') &&
-      'inject_script_beta.js' || 'inject_script.js';
-  s.src = chrome.runtime.getURL(script);
-  (document.head || document.documentElement).appendChild(s);
+  function injectScript(filename) {
+    let s = document.createElement('script');
+    s.src = chrome.runtime.getURL(filename);
+    (document.head || document.documentElement).appendChild(s);
+  }
+  if (isBeta()) {
+    injectScript('rpc_proxy.js');
+    injectScript('flight_data.js');
+    injectScript('inject_script_beta.js');
+  } else {
+    injectScript('inject_script.js');
+  }
 })();
 
 (function() {
   var l = document.createElement('link');
   l.rel = 'stylesheet';
-  let filename = (window.location.pathname == '/flights/beta') &&
-      'inject_style_beta.css' || 'inject_style.css';
+  let filename = 
+      isBeta() && 'inject_style_beta.css' || 'inject_style.css';
   l.href = chrome.runtime.getURL(filename);
   (document.head || document.documentElement).appendChild(l);
 })();
