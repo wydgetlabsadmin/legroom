@@ -74,7 +74,21 @@
     if (!reqDataObj) {
       return; // Do nothing.
     }
+    console.log('request:');
+    console.log(JSON.stringify(reqDataObj));
     updateCacheWithRequestObject(reqDataObj);
+    let detailReqData = JSON.stringify(makeDetailRequest(vStr));
+    console.log('detail request:');
+    console.log(detailReqData);
+    window.gogogo = function() {
+      console.log(requestUrl);
+      console.log(detailReqData);
+      let dataQueryParamStr = 'data:'
+          + encodeURIComponent(detailReqData) + ',s:s,,_fmt:jspb';
+      requestUrl = requestUrl.replace(/data:.+/, dataQueryParamStr);
+      console.log(requestUrl);
+      loadDetail(requestUrl);
+    }
   }
 
   function processSearchResult(resultObj) {
@@ -348,6 +362,22 @@
     }
     return 'UNKNOWN';
   }
+
+  function makeDetailRequest(reqDataStr) {
+    let req = decodeRequestData(reqDataStr);
+    console.log(req);
+    req[0][0][0][0][3] = "SFODEN0UA756";
+    req[0][1][0][0][0] = null;
+    req[0][1][0][0][2] = [];
+    req[0][5] = [[6830, null, "USD"]];
+    return req;
+  }
+
+  function loadDetail(url) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.send();
+  };
 
   // Register processRpc to proxyXhr.
   taco5.proxyXhr(processRpc);
