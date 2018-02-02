@@ -17,6 +17,21 @@
     }
     return value;
   }
+
+  window.taco5 = window.taco5 || {};
+  window.taco5.flightdata = window.taco5.flightdata || {};
+  window.taco5.flightdata.get = function(itineraryId) {
+    let cacheKey = getLocationHash();
+    let cache = flightCache.get(cacheKey);
+    if (!cache || !cache.itineraries) {
+      return; // Empty cache.
+    }
+    return cache.itineraries.get(itineraryId);
+  }
+
+  window.taco5.flightdata.printCache = function() {
+    console.log(flightCache);
+  }
     
   function updateCacheWithRequestObject(requestObj) {
     if (!requestObj) {
@@ -42,7 +57,12 @@
   }
 
   function getLocationHash() {
-    return location.hash.substr(1);
+    // Always return 1 for now. Used to use window.location for
+    // this but it isn't reliable since it got updated after 
+    // rpc and some elements draw.
+    // TODO(dbugger): Figure out a neat way to purge unused.
+    return 1;
+    //return location.hash.substr(1);
   }
 
   function toQueryString(urlStr) {
@@ -74,12 +94,8 @@
     if (!reqDataObj) {
       return; // Do nothing.
     }
-    console.log('request:');
-    console.log(JSON.stringify(reqDataObj));
     updateCacheWithRequestObject(reqDataObj);
     let detailReqData = JSON.stringify(makeDetailRequest(vStr));
-    console.log('detail request:');
-    console.log(detailReqData);
     window.gogogo = function() {
       console.log(requestUrl);
       console.log(detailReqData);
@@ -146,8 +162,6 @@
   function processRpc(requestUrl, requestHeaders, jsonStr) {
     processRequest(requestUrl, requestHeaders);
     processResponse(jsonStr);
-
-    console.log(flightCache);
   };
 
   function processItinerary(itinArray) {
@@ -170,7 +184,7 @@
       durationMinutes: flightPb[5],
       aircraft: flightPb[15],
       legroomLength: flightPb[17],
-      legroomInfo: LEGROOM_INFO[flightPb[7]],
+      legroomInfo: LEGROOM_INFO[flightPb[7]] || flightPb[7],
       wifi: !!flightPb[6][0],
       power: !!flightPb[6][3],
       onDemandVideo: !!flightPb[6][9],
@@ -184,9 +198,11 @@
     1: 'AVERAGE',
     2: 'BELOW',
     3: 'ABOVE',
-    4: 'Extra reclining seat',
-    5: 'Lie flat seat',
-    9: 'Angled flat seat'
+    4: 'Extra Reclining',
+    5: 'Lie Flat',
+    6: 'Suite',
+    8: 'Reclining',
+    9: 'Angled Flat'
   });
 
   function processOffer(offerPb) {
@@ -365,7 +381,6 @@
 
   function makeDetailRequest(reqDataStr) {
     let req = decodeRequestData(reqDataStr);
-    console.log(req);
     req[0][0][0][0][3] = "SFODEN0UA756";
     req[0][1][0][0][0] = null;
     req[0][1][0][0][2] = [];

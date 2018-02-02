@@ -74,8 +74,10 @@ function handleExpandableCard(node) {
   if (!rowLi) {
     return;
   }
-  let row = rowLi.querySelector('div.gws-flights-results__itinerary-card-summary');
-  extendRow(row, legs);
+  let itineraryId = rowLi.getAttribute('data-fp');
+  let row = rowLi.querySelector(
+      'div.gws-flights-results__itinerary-card-summary');
+  extendRow(row, legs, itineraryId);
 }
 
 function findCssClass(elem, regex) {
@@ -99,10 +101,16 @@ function extractAmenities(item) {
   }
   let name = resultCssClass.match(/__(.*)$/)[1];
   if (name.match(/seat-.*/)) {
+    let text = item.innerText;
+    let legroomSize = item.innerText.match(/\(([^\)]*)\)/);
+    if (legroomSize && legroomSize.length > 0) {
+      // Use dimension if exist in text.
+      text = legroomSize[0];
+    }
     return {
       name: 'seat',
       cssClass: resultCssClass,
-      text: item.innerText.match(/\(([^\)]*)\)/)[1]
+      text: text
     };
   }
   if (name.match(/on-demand-video|live-tv|streaming-video/)) {
@@ -125,16 +133,13 @@ let settings = {
   inch: false
 };
 
-function extendRow(rowElem, legs) {
+function extendRow(rowElem, legs, itineraryId) {
   // Do not repeat.
   if (rowElem.querySelector('.legroom-row-extend')) {
     return;
   }
   let wrap = document.createElement('div');
   wrap.classList.add('legroom-row-extend');
-  if (settings.legroom) {
-    wrap.appendChild(buildAmenitiesElement(legs, 'seat'));
-  }
   if (settings.wifi) {
     wrap.appendChild(buildAmenitiesElement(legs, 'wifi'));
   }
@@ -142,9 +147,48 @@ function extendRow(rowElem, legs) {
     wrap.appendChild(buildAmenitiesElement(legs, 'power'));
   }
   if (settings.aircraft) {
-    wrap.appendChild(buildAmenitiesElement(legs, 'aircraft'));
+    let itinerary = taco5.flightdata.get(itineraryId);
+    let updatedLegs = legs;
+    if (itinerary) {
+      updatedLegs = legs.map(l => Object.clone(l));
+      legs.forEach((leg, i) => {
+        let itinFlight = itinerary.flights[i];
+        if (itinFlight && itinFlight.aircraft) {
+          leg.amenities.aircraft.title = leg.amenities.aircraft.text;
+          leg.amenities.aircraft.text = itinFlight.aircraft;
+        }
+      });
+    }
+    wrap.appendChild(buildAmenitiesElement(updatedLegs, 'aircraft'));
+  }
+  if (settings.legroom) {
+    let itinerary = taco5.flightdata.get(itineraryId);
+    let updatedLegs = legs;
+    if (itinerary) {
+      updatedLegs = legs.map(l => Object.clone(l));
+      legs.forEach((leg, i) => {
+        let itinFlight = itinerary.flights[i];
+        if(itinFlight.legroomLength) {
+          leg.amenities.seat.title = leg.amenities.seat.text;
+          leg.amenities.seat.text = itinFlight.legroomLength;
+        } else if (itinFlight.legroomInfo) {
+          leg.amenities.seat.title = leg.amenities.seat.text;
+          leg.amenities.seat.text = itinFlight.legroomInfo;
+        }
+      });
+    }
+    wrap.appendChild(buildAmenitiesElement(legs, 'seat'));
   }
   rowElem.appendChild(wrap);
+}
+
+if (!Object.clone) {
+  Object.clone = function(that) {
+    if (!that) return that;
+    let o = {};
+    Object.keys(that).forEach(key => o[key] = that[key]);
+    return o;
+  }
 }
 
 function buildAmenitiesElement(legs, amenityName) {
@@ -157,6 +201,9 @@ function buildAmenitiesElement(legs, amenityName) {
         if (amenity.text && amenity.text.length > 10) {
           leg.title = amenity.text;
         }
+      }
+      if (amenity.title) {
+        leg.title = amenity.title;
       }
       if (amenity.cssClass) {
         leg.classList.add(amenity.cssClass);
