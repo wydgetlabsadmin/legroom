@@ -181,7 +181,7 @@ console.log('Enhancing Google Flights search with amenities extension.');
     if (!opt_ignoreDetail && !itinerary.has_detail) {
       window.setTimeout(function() {
           loadDetail(Number(itin), () => updateNode(n, true));
-      }, 250);
+      }, 200 + Math.floor(Math.random()*300));
     }
 
     // Remove existing node.
@@ -299,7 +299,18 @@ console.log('Enhancing Google Flights search with amenities extension.');
     var existingMap = cachedItinerary.get(key);
     if (existingMap) {
       map.forEach(function(v, k) {
-        existingMap.set(k, v);
+        let e = existingMap.get(k);
+        if (e) {
+          // Only copy carry-on restriction.
+          e.flights.forEach((f, i) => {
+            if (v.flights[i].carry_on_restricted) {
+              f.carry_on_restricted = v.flights[i].carry_on_restricted;
+            }
+          });
+          e.has_detail = v.has_detail;
+        } else {
+          existingMap.set(k, v);
+        }
       });
     } else {
       cachedItinerary.set(key, map);
