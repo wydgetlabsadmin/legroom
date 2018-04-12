@@ -427,6 +427,9 @@ console.log('Enhancing Google Flights search with amenities extension.');
 
   var observeForClassPrefix = function(callback) {
     var root = document.querySelector('#root');
+    if (!root) {
+      return; // Do nothing. This is not the right page.
+    }
     new MutationObserver(function(mutations, o) {
       mutations.forEach(function(m) {
         if (m.type == 'attributes' && m.attributeName == 'class') {

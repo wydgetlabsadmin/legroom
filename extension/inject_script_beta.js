@@ -4,7 +4,7 @@
 window.addEventListener('load', function() {
 */
 function observeDom() {
-  let amenitiesClass = 'gws-flights-results__leg-amenities';
+  console.log('expandable!!');
   new MutationObserver(function(mutations, o) {
     mutations.forEach(function(m) {
       if (m.type != 'childList' || m.addedNodes.length <= 0) {
