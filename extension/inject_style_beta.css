@@ -8,8 +8,18 @@
   position: relative;
 }
 
+.gws-flights-results__results-container.gws-flights__center-content {
+  max-width: 1124px;
+  width: 1124px;
+}
+
 .legroom-row-extend .seat {
   flex: 1 1;
+  width: 120px;
+}
+.legroom-row-extend .seat .leg {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .legroom-row-extend .leg {
@@ -47,9 +57,9 @@
   background: #e0e0e0;
   color: rgba(0, 0, 0, .54);
   font-size: 11px;
-  margin-left: -135px;
+  margin-left: -173px;
   padding: 16px 8px;
   text-align: right;
-  width: 213px;
+  width: 272px;
 }
 

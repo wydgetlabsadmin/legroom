@@ -4,7 +4,6 @@
 window.addEventListener('load', function() {
 */
 function observeDom() {
-  console.log('expandable!!');
   new MutationObserver(function(mutations, o) {
     mutations.forEach(function(m) {
       if (m.type != 'childList' || m.addedNodes.length <= 0) {
@@ -96,10 +95,12 @@ function extractAmenities(item) {
   }
   let name = resultCssClass.match(/__(.*)$/)[1];
   if (name.match(/seat-.*/)) {
+    let m = item.innerText.match(/\(([^\)]*)\)/) ||
+        item.innerText.match(/(.*) seat/);
     return {
       name: 'seat',
       cssClass: resultCssClass,
-      text: item.innerText.match(/\(([^\)]*)\)/)[1]
+      text: m && m[1] || item.innerText
     };
   }
   if (name.match(/on-demand-video|live-tv|streaming-video/)) {
