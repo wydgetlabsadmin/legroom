@@ -4,7 +4,6 @@
 window.addEventListener('load', function() {
 */
 function observeDom() {
-  let amenitiesClass = 'gws-flights-results__leg-amenities';
   new MutationObserver(function(mutations, o) {
     mutations.forEach(function(m) {
       if (m.type != 'childList' || m.addedNodes.length <= 0) {
@@ -101,16 +100,12 @@ function extractAmenities(item) {
   }
   let name = resultCssClass.match(/__(.*)$/)[1];
   if (name.match(/seat-.*/)) {
-    let text = item.innerText;
-    let legroomSize = item.innerText.match(/\(([^\)]*)\)/);
-    if (legroomSize && legroomSize.length > 0) {
-      // Use dimension if exist in text.
-      text = legroomSize[0];
-    }
+    let m = item.innerText.match(/\(([^\)]*)\)/) ||
+        item.innerText.match(/(.*) seat/);
     return {
       name: 'seat',
       cssClass: resultCssClass,
-      text: text
+      text: m && m[1] || item.innerText
     };
   }
   if (name.match(/on-demand-video|live-tv|streaming-video/)) {

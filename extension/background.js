@@ -148,11 +148,12 @@ function getDefaultSetting() {
 function loadSetting() {
   if (window.localStorage) {
     try {
-      return JSON.parse(window.localStorage.getItem('setting'));
+      let s = JSON.parse(window.localStorage.getItem('setting'));
+      if (s) return s;
     } catch (e) {
       // Bad setting or non-JSON. Just replace it.
-      return null;
     }
+    return getDefaultSetting();
   }
   // Local storage unsupported. Ephemereal state then.
   if (!ephemerealSetting) {

@@ -5,27 +5,26 @@ function isBeta() {
 
   
 (function() {
-  function injectScript(filename) {
-    let s = document.createElement('script');
-    s.src = chrome.runtime.getURL(filename);
+  function insertScript(name) {
+    var s = document.createElement('script');
+    s.src = chrome.runtime.getURL(name);
     (document.head || document.documentElement).appendChild(s);
   }
-  if (isBeta()) {
-    injectScript('rpc_proxy.js');
-    injectScript('flight_data.js');
-    injectScript('inject_script_beta.js');
-  } else {
-    injectScript('inject_script.js');
-  }
+  insertScript('inject_script.js');
+  insertScript('inject_script_beta.js');
+  insertScript('rpc_proxy.js');
+  insertScript('flight_data.js');
 })();
 
 (function() {
-  var l = document.createElement('link');
-  l.rel = 'stylesheet';
-  let filename = 
-      isBeta() && 'inject_style_beta.css' || 'inject_style.css';
-  l.href = chrome.runtime.getURL(filename);
-  (document.head || document.documentElement).appendChild(l);
+  function insertCss(name) {
+    var l = document.createElement('link');
+    l.rel = 'stylesheet';
+    l.href = chrome.runtime.getURL(name);
+    (document.head || document.documentElement).appendChild(l);
+  }
+  insertCss('inject_style_beta.css');
+  insertCss('inject_style.css');
 })();
 
 // Pass in chrome extension ID.
