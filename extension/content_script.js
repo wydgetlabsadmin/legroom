@@ -10,10 +10,10 @@ function isBeta() {
     s.src = chrome.runtime.getURL(name);
     (document.head || document.documentElement).appendChild(s);
   }
-  insertScript('inject_script.js');
-  insertScript('inject_script_beta.js');
   insertScript('rpc_proxy.js');
   insertScript('flight_data.js');
+  insertScript('inject_script.js');
+  insertScript('inject_script_beta.js');
 })();
 
 (function() {
