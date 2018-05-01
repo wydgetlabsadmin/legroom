@@ -175,10 +175,10 @@
       aircraft: flightPb[15],
       legroomLength: flightPb[17],
       legroomInfo: LEGROOM_INFO[flightPb[7]] || flightPb[7],
-      wifi: !!flightPb[6][0],
-      power: !!flightPb[6][3],
-      onDemandVideo: !!flightPb[6][9],
-      streamVideo: !!flightPb[6][10],
+      wifi: flightPb[6] && !!flightPb[6][0],
+      power: flightPb[6] && !!flightPb[6][3],
+      onDemandVideo: flightPb[6] && !!flightPb[6][9],
+      streamVideo: flightPb[6] && !!flightPb[6][10],
       seatClass: toSeatClass(flightPb[11]),
       raw: flightPb
     }

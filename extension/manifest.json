@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
 
-  "name": "Legrooms for Google Flights",
+  "name": "Legrooms for Google Flights (Test)",
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legrooms, carry-on restrictions and other amenities on search result list.",
-  "version": "1.7.9",
+  "version": "1.8.0",
   "browser_action": {
     "default_icon": {
       "16": "seat_16_grey.png",

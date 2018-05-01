@@ -9,10 +9,14 @@
   position: relative;
 }
 
+/* Increase center column width overall. */
 .gws-flights-results__results-container.gws-flights__center-content {
-  /*max-width: 1124px;
+  max-width: 1124px;
   width: 1124px;
-  */
+}
+/* To make heading position acceptable. */
+.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {
+  justify-content: flex-end;
 }
 
 .legroom-row-extend .seat {
@@ -59,7 +63,7 @@
   background: transparent;
   color: rgba(0, 0, 0, .54);
   font-size: 11px;
-  margin-left: -137px;
+  margin-left: 0px;
   padding: 16px 8px;
   text-align: right;
   width: 214px;
