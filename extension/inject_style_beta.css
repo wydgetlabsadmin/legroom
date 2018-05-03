@@ -4,13 +4,19 @@
   display: flex;
   flex: 0 0;
   font-size: 13px;
+  min-width: 213px;
   padding: 10px 8px;
   position: relative;
 }
 
+/* Increase center column width overall. */
 .gws-flights-results__results-container.gws-flights__center-content {
   max-width: 1124px;
   width: 1124px;
+}
+/* To make heading position acceptable. */
+.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {
+  justify-content: flex-end;
 }
 
 .legroom-row-extend .seat {
@@ -31,7 +37,7 @@
   background-size: 16px;
   background-position: left 7px;
   background-repeat: no-repeat;
-  padding: 8px 14px 0 18px;
+  padding: 8px 14px 1px 18px;
 }
 
 .legroom-row-extend .wifi, 
@@ -46,7 +52,7 @@
   height: 12px;
 }
 .legroom-row-extend .aircraft {
-  width: 8em;
+  width: 48px;
 }
 .legroom-row-extend .aircraft .leg {
   overflow: hidden;
@@ -54,12 +60,12 @@
 }
 
 .legroom-header {
-  background: #e0e0e0;
+  background: transparent;
   color: rgba(0, 0, 0, .54);
   font-size: 11px;
-  margin-left: -173px;
+  margin-left: 0px;
   padding: 16px 8px;
   text-align: right;
-  width: 272px;
+  width: 214px;
 }
 

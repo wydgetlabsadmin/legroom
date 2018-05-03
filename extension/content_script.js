@@ -1,10 +1,17 @@
 
+function isBeta() {
+  return window.location.pathname == '/flights/beta';
+}
+
+  
 (function() {
   function insertScript(name) {
     var s = document.createElement('script');
     s.src = chrome.runtime.getURL(name);
     (document.head || document.documentElement).appendChild(s);
   }
+  insertScript('rpc_proxy.js');
+  insertScript('flight_data.js');
   insertScript('inject_script.js');
   insertScript('inject_script_beta.js');
 })();
