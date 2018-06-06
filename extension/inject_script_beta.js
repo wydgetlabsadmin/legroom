@@ -143,9 +143,6 @@ function extendRow(rowElem, legs, itineraryId) {
     wrap.appendChild(buildAmenitiesElement(legs, 'power'));
   }
   if (settings.video) {
-    legs.forEach((leg, i) => {
-      console.log(leg);
-    });
     wrap.appendChild(buildAmenitiesElement(legs, 'video'));
   }
   if (settings.aircraft) {
