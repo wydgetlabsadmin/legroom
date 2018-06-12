@@ -125,6 +125,7 @@ let settings = {
   carryon: true,
   wifi: true,
   power: true,
+  video: true,
   inch: false
 };
 
@@ -140,6 +141,9 @@ function extendRow(rowElem, legs, itineraryId) {
   }
   if (settings.power) {
     wrap.appendChild(buildAmenitiesElement(legs, 'power'));
+  }
+  if (settings.video) {
+    wrap.appendChild(buildAmenitiesElement(legs, 'video'));
   }
   if (settings.aircraft) {
     let itinerary = taco5.flightdata.get(itineraryId);
@@ -197,8 +201,8 @@ function buildAmenitiesElement(legs, amenityName) {
           leg.title = amenity.text;
         }
       }
-      if (amenity.title) {
-        leg.title = amenity.title;
+      if (amenity.title || amenity.alt) {
+        leg.title = amenity.title || amenity.alt;
       }
       if (amenity.cssClass) {
         leg.classList.add(amenity.cssClass);

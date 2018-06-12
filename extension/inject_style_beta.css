@@ -4,15 +4,15 @@
   display: flex;
   flex: 0 0;
   font-size: 13px;
-  min-width: 213px;
+  min-width: 237px;
   padding: 10px 8px;
   position: relative;
 }
 
 /* Increase center column width overall. */
 .gws-flights-results__results-container.gws-flights__center-content {
-  max-width: 1124px;
-  width: 1124px;
+  max-width: 1148px;
+  width: 1148px;
 }
 /* To make heading position acceptable. */
 .gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {
@@ -40,11 +40,13 @@
   padding: 8px 14px 1px 18px;
 }
 
-.legroom-row-extend .wifi, 
-.legroom-row-extend .power {
+.legroom-row-extend .wifi,
+.legroom-row-extend .power,
+.legroom-row-extend .video {
   width: 24px;
 }
-.legroom-row-extend .wifi .leg, 
+.legroom-row-extend .wifi .leg,
+.legroom-row-extend .video .leg,
 .legroom-row-extend .power .leg {
   background-size: 16px;
   background-position: left 7px;
@@ -66,6 +68,6 @@
   margin-left: 0px;
   padding: 16px 8px;
   text-align: right;
-  width: 214px;
+  width: 238px;
 }
 
