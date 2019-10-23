@@ -1,9 +1,3 @@
-
-function isBeta() {
-  return window.location.pathname == '/flights/beta';
-}
-
-  
 (function() {
   function insertScript(name) {
     var s = document.createElement('script');
