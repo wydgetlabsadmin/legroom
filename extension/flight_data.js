@@ -99,6 +99,9 @@
 
   function processSearchResult(resultObj) {
     let itineraries = [];
+    if (!resultObj[2]) {
+      return;
+    }
     if (resultObj[2][2]) {
       let bestItineraries = resultObj[2][2][0];
       if (bestItineraries) {
@@ -145,7 +148,7 @@
       console.log(respObj);
       return;
     }
-    
+   
     processSearchResult(respObj['_r']);
   }
 
