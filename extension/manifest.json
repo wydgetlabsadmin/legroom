@@ -23,8 +23,7 @@
     "inject_style.css",
     "inject_style_beta.css",
     "rpc_proxy.js",
-    "flight_data.js",
-    "flight_dom.js"
+    "flight_data.js"
   ],
   "content_scripts": [{
     "matches": [
