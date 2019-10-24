@@ -11,7 +11,9 @@ window.taco5.proxyXhr = function(callback) {
   XMLHttpRequest.prototype.open = function() {
     var method = arguments[0];
     var url = arguments[1]; 
-    if (method == 'GET' && url.match(/\/flights\/search/)) {
+    if (method == 'GET' &&
+        (url.match(/\/flights\/search/) ||
+        url.match(/\/flights\/booking/))) {
       this.addEventListener('loadend', function() {
         if (this.status >= 200 && this.status < 300) {
           callback(url, this.__headers, this.responseText);

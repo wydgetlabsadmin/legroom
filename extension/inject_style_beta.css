@@ -10,7 +10,8 @@
 }
 
 /* Increase center column width overall. */
-.gws-flights-results__results-container.gws-flights__center-content {
+.gws-flights-results__results-container.gws-flights__center-content,
+.gws-flights__center-content.gws-flights-results__selections-list {
   max-width: 1148px;
   width: 1148px;
 }

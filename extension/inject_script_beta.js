@@ -1,8 +1,5 @@
 (function() {
 
-/*
-window.addEventListener('load', function() {
-*/
 function observeDom() {
   new MutationObserver(function(mutations, o) {
     mutations.forEach(function(m) {
@@ -22,7 +19,8 @@ function observeDom() {
       return;
     }
     if (node.classList &&
-        node.classList.contains('gws-flights-widgets-expandablecard__body')) {
+        (node.classList.contains('gws-flights-widgets-expandablecard__body') ||
+        node.classList.contains('gws-flights-widgets-expandablecard__card'))) {
       handleExpandableCard(node);
       return;
     }
@@ -70,13 +68,20 @@ function handleExpandableCard(node) {
   });
 
   let rowLi = node.closest('li.gws-flights-results__result-item');
-  if (!rowLi) {
+  if (rowLi) {
+    let itineraryId = rowLi.getAttribute('data-fp');
+    let row = rowLi.querySelector(
+        'div.gws-flights-results__itinerary-card-summary');
+    extendRow(row, legs, itineraryId);
     return;
   }
-  let itineraryId = rowLi.getAttribute('data-fp');
-  let row = rowLi.querySelector(
+  // Maybe booking page.
+  let fpDiv = node.querySelector('div[data-fp]');
+  let itineraryId = fpDiv.getAttribute('data-fp');
+  let row = node.querySelector(
       'div.gws-flights-results__itinerary-card-summary');
   extendRow(row, legs, itineraryId);
+  return;
 }
 
 function findCssClass(elem, regex) {
@@ -136,6 +141,7 @@ function extendRow(rowElem, legs, itineraryId) {
   }
   let wrap = document.createElement('div');
   wrap.classList.add('legroom-row-extend');
+  wrap.setAttribute('itin-id', itineraryId);
   if (settings.wifi) {
     wrap.appendChild(buildAmenitiesElement(legs, 'wifi'));
   }
@@ -179,6 +185,16 @@ function extendRow(rowElem, legs, itineraryId) {
     wrap.appendChild(buildAmenitiesElement(legs, 'seat'));
   }
   rowElem.appendChild(wrap);
+}
+
+function updateRow(rowElem, value) {
+  let aircraftElem = rowElem.querySelector('div.aircraft');
+  if (aircraftElem) {
+    let legElems = aircraftElem.querySelectorAll('.leg');
+    legElems.forEach((elem, i) => {
+      elem.textContent = value.flights[i].aircraft;
+    });
+  }
 }
 
 if (!Object.clone) {
@@ -233,5 +249,13 @@ function queryAndExtend() {
 console.log('Legroom extension for Google Flights.');
 // Do it at least once.
 queryAndExtend();
+
+window.taco5.flightdata.addListener(function(id, data) {
+  let extensionElem =
+      document.querySelector('div.legroom-row-extend[itin-id="' + id + '"]');
+  if (extensionElem) {
+    updateRow(extensionElem, data);
+  }
+});
 
 })(); // Close closure wrap.

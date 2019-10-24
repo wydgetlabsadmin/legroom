@@ -32,6 +32,12 @@
   window.taco5.flightdata.printCache = function() {
     console.log(flightCache);
   }
+
+  let listeners = [];
+
+  window.taco5.flightdata.addListener = function(callback) {
+    listeners.push(callback);
+  }
     
   function updateCacheWithRequestObject(requestObj) {
     if (!requestObj) {
@@ -53,6 +59,15 @@
     // Insert-replace itineraries.
     itineraryMap.forEach((v, k) => {
       value.itineraries.set(k, v);
+      if (listeners.length > 0) {
+        listeners.forEach(listener => {
+          try {
+            listener(k, v);
+          } catch (e) {
+            console.err(e);
+          }
+        });
+      }
     });
   }
 
@@ -102,7 +117,9 @@
     if (!resultObj[2]) {
       return;
     }
+
     if (resultObj[2][2]) {
+      // Search result.
       let bestItineraries = resultObj[2][2][0];
       if (bestItineraries) {
         itineraries = itineraries.concat(bestItineraries);
@@ -116,14 +133,13 @@
         itineraryMap.set(i.name, i);
       });
       updateCacheWithItineraries(itineraryMap);
-    } else {
-      // Probably details.
-      if (resultObj[2][1]) {
-        let detailItinerary = processItinerary(resultObj[2][1]);
-        let detailOffer = processOffer(resultObj[2][3]);
-        console.log(detailItinerary);
-        console.log(detailOffer);
-      }
+    } else if (resultObj[2][1]) {
+      // Bookings.
+      let itineraryMap = new Map();
+      resultObj[2][1].map(processBooking).forEach(i => {
+        itineraryMap.set(i.name, i);
+      });
+      updateCacheWithItineraries(itineraryMap);
     }
   }
 
@@ -148,7 +164,7 @@
       console.log(respObj);
       return;
     }
-   
+
     processSearchResult(respObj['_r']);
   }
 
@@ -163,6 +179,13 @@
       price: itinArray[0][6],
       flights: itinArray[0][4].map(toFlight),
       lookupId: itinArray[0][18]
+    };
+  }
+
+  function processBooking(array) {
+    return {
+      name: array[1],
+      flights: array[4].map(toFlight)
     };
   }
 
