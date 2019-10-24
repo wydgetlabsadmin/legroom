@@ -77,6 +77,9 @@ function handleExpandableCard(node) {
   }
   // Maybe booking page.
   let fpDiv = node.querySelector('div[data-fp]');
+  if (!fpDiv) {
+    return; // Maybe not.
+  }
   let itineraryId = fpDiv.getAttribute('data-fp');
   let row = node.querySelector(
       'div.gws-flights-results__itinerary-card-summary');

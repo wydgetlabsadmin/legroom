@@ -22,7 +22,6 @@
     "inject_script_beta.js",
     "inject_style.css",
     "inject_style_beta.css",
-    "rpc_proxy.js",
     "flight_data.js"
   ],
   "content_scripts": [{

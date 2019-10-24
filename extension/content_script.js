@@ -4,9 +4,7 @@
     s.src = chrome.runtime.getURL(name);
     (document.head || document.documentElement).appendChild(s);
   }
-  insertScript('rpc_proxy.js');
   insertScript('flight_data.js');
-  insertScript('inject_script.js');
   insertScript('inject_script_beta.js');
 })();
 
@@ -18,7 +16,6 @@
     (document.head || document.documentElement).appendChild(l);
   }
   insertCss('inject_style_beta.css');
-  insertCss('inject_style.css');
 })();
 
 // Pass in chrome extension ID.
