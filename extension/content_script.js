@@ -48,7 +48,12 @@ window.addEventListener('message', function(messageEvent) {
 
 // Listen to events from extension.
 function setupExtensionConnection() {
-  let port = chrome.runtime.connect({ name: 'content' });
+  let port;
+  try {
+    port = chrome.runtime.connect({ name: 'content' });
+  } catch (e) {
+    console.log(e);
+  }
   port.onMessage.addListener(function(message) {
     if (message.type == 'setting_updated') {
       injectSetting(message.setting);

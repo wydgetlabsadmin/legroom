@@ -64,7 +64,7 @@
           try {
             listener(k, v);
           } catch (e) {
-            console.err(e);
+            console.error(e);
           }
         });
       }
@@ -86,99 +86,115 @@
     return linkElem.search.substr(1);
   }
 
-  function decodeRequestData(reqDataStr) {
-    let decoded = decodeURIComponent(reqDataStr);
-    try {
-      return JSON.parse(decoded);
-    } catch (e) {
-      // Not a json, probably continuation token.
-      return null;
-    }
-  }
-
   function processRequest(requestUrl, requestHeaders) {
-    let async = toQueryString(requestUrl)
-        .split('&').find(s => s.startsWith("async="));
-    if (!async) {
+    let reqId = toQueryString(requestUrl)
+        .split('&').find(s => s.startsWith("_reqid="));
+    if (!reqId) {
       return; // Not data that we want.
     }
-    async = async.substr(6);
-
-    let vStr = new Map(async.split(',').map(s => s.split(':'))).get('data');
-    let reqDataObj = decodeRequestData(vStr);
-    if (!reqDataObj) {
-      return; // Do nothing.
-    }
-    updateCacheWithRequestObject(reqDataObj);
+    reqId = reqId.substr(7);
+	console.log('got reqId: ' + reqId);
+	// Use _reqId for now. Not sure what we really here anymore.
+    updateCacheWithRequestObject(reqId);
   }
 
   function processSearchResult(resultObj) {
+	console.log(resultObj);
     let itineraries = [];
-    if (!resultObj[2]) {
-      return;
-    }
 
-    if (resultObj[2][2]) {
-      // Search result.
-      let bestItineraries = resultObj[2][2][0];
+	// Search result.
+    if (resultObj[2]) {
+	  let results = resultObj[2];
+      let bestItineraries = results[0];
       if (bestItineraries) {
         itineraries = itineraries.concat(bestItineraries);
       }
-      let otherItineraries = resultObj[2][2][1];
-      if (otherItineraries) {
-        itineraries = itineraries.concat(otherItineraries);
+    }
+    if (resultObj[3]) {
+      let results = resultObj[3];
+        let otherItineraries = results[0];
+        if (otherItineraries) {
+          itineraries = itineraries.concat(otherItineraries);
+        }
       }
-      let itineraryMap = new Map();
-      itineraries.map(processItinerary).forEach(i => {
-        itineraryMap.set(i.name, i);
-      });
-      updateCacheWithItineraries(itineraryMap);
-    } else if (resultObj[2][1]) {
-      // Bookings.
-      let itineraryMap = new Map();
-      resultObj[2][1].map(processBooking).forEach(i => {
-        itineraryMap.set(i.name, i);
-      });
-      updateCacheWithItineraries(itineraryMap);
+    let itineraryMap = new Map();
+    itineraries.map(processItinerary).forEach(i => {
+      itineraryMap.set(i.name, i);
+    });
+    updateCacheWithItineraries(itineraryMap);
+  }
+
+  // Split multiple JSON protos.
+  // Input usually looks like this 8[hello]9[banana]
+  // where 8 is how long the next data + the count itself.
+  // callback is called for every value found.
+  function jsonProtoSplitter(jsonStr, callback) {
+    while(jsonStr.length > 0) {
+      let marker = jsonStr.match(/^[0-9]+/)[0];
+      let value = jsonStr.substr(marker.length, marker);
+      callback(value);
+      let end = marker.length + Number.parseInt(marker, 10);
+      jsonStr = jsonStr.substr(end).trim();
     }
   }
 
   function processResponse(jsonStr) {
     // Trunc gibberish.
     if (jsonStr.startsWith(')]}\'')) {
-      jsonStr = jsonStr.substr(5);
+      jsonStr = jsonStr.substr(5).trim();
     }
-    let respObj;
-    try {
-      respObj = JSON.parse(jsonStr);
-    } catch (e) {
-      console.log('Error while parsing response as JSON.');
-      console.log(e);
-      console.log('Actual response.');
-      console.log(json);
-      return;
-    }
+    jsonProtoSplitter(
+      jsonStr,
+      function(str) {
+        let respObj;
+        try {
+          respObj = JSON.parse(str);
+          try {
+            respObj = JSON.parse(respObj[0][2]);
+          } catch (e) {
+            // Probably not valid. Ignore.
+          }
+        } catch (e) {
+          console.log('Error while parsing response as JSON.');
+          console.log(e);
+          console.log('Actual response.');
+          console.log(json);
+          throw e;
+        }
 
-    if (!respObj['_r']) {
-      console.log('Unknown response:');
-      console.log(respObj);
-      return;
-    }
+        if (!respObj) {
+          console.log('Unknown response:');
+          console.log(respObj);
+          return;
+        }
 
-    processSearchResult(respObj['_r']);
+        try {
+          processSearchResult(respObj);
+        } catch (e) {
+          console.log(e);
+          throw e;
+        }
+      }
+    );
   }
 
   function processRpc(requestUrl, requestHeaders, jsonStr) {
     processRequest(requestUrl, requestHeaders);
-    processResponse(jsonStr);
+    try {
+      processResponse(jsonStr);
+    } catch(e) {
+      console.error(e);
+      throw e;
+    }
   };
 
   function processItinerary(itinArray) {
+    console.log(itinArray);
     return {
-      name: itinArray[0][1],
-      price: itinArray[0][6],
-      flights: itinArray[0][4].map(toFlight),
-      lookupId: itinArray[0][18]
+      name: itinArray[0][17], // Correspond with data-slice-id in UI.
+      price: itinArray[0][9],
+      flights: itinArray[0][2].map(toFlight),
+      lookupId: itinArray[0][17] // Correspond with data-slide-id in UI.
     };
   }
 
@@ -191,23 +207,41 @@
 
   function toFlight(flightPb) {
     return {
-      origin: flightPb[0],
-      destination: flightPb[1],
-      airline: flightPb[2][0],
-      number: flightPb[2][1],
-      departure: flightPb[3][0],
-      arrival: flightPb[4][0],
-      durationMinutes: flightPb[5],
-      aircraft: flightPb[15],
-      legroomLength: flightPb[17],
-      legroomInfo: LEGROOM_INFO[flightPb[7]] || flightPb[7],
-      wifi: flightPb[6] && !!flightPb[6][0],
-      power: flightPb[6] && !!flightPb[6][3],
-      onDemandVideo: flightPb[6] && !!flightPb[6][9],
-      streamVideo: flightPb[6] && !!flightPb[6][10],
-      seatClass: toSeatClass(flightPb[11]),
+      origin: flightPb[3],
+      destination: flightPb[6],
+      airline: flightPb[22][0],
+      number: flightPb[22][1],
+      departure: {
+				hour: flightPb[8][0],
+				minute: flightPb[8][1]
+			},
+      arrival: {
+				hour: flightPb[10][0],
+				minute: flightPb[10][1]
+			},
+      durationMinutes: flightPb[11],
+      aircraft: flightPb[17],
+      legroomLength: flightPb[14],
+      legroomInfo: LEGROOM_INFO[flightPb[13]] || flightPb[13],
+      wifi: flightPb[12] && !!flightPb[12][0],
+      power: flightPb[12] && (!!flightPb[12][3] || !!flightPb[12][1]),
+      video : extractVideoSetup(flightPb[12]),
+      seatClass: toSeatClass(flightPb[16]),
       raw: flightPb
     }
+  }
+
+  function extractVideoSetup(amenities) {
+    if(!amenities) {
+      return null;
+    }
+    if(amenities[10]) {
+      return 'stream';
+    } 
+    if(amenities[9]) {
+      return 'ondemand';
+    }
+    return null;
   }
   
   const LEGROOM_INFO = Object.freeze({
@@ -401,9 +435,8 @@
     XMLHttpRequest.prototype.open = function() {
       var method = arguments[0];
       var url = arguments[1]; 
-      if (method == 'GET' &&
-          (url.match(/\/flights\/search/) ||
-          url.match(/\/flights\/booking/))) {
+      if (method == 'POST' &&
+          (url.match(/\/GetShoppingResults/))) {
         this.addEventListener('loadend', function() {
           if (this.status >= 200 && this.status < 300) {
             callback(url, this.__headers, this.responseText);

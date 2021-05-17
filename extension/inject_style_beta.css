@@ -1,22 +1,25 @@
 .legroom-row-extend {
-  background-color: #eee;
+  background-color: transparent;
   color: rgba(0, 0, 0, .54);
   display: flex;
   flex: 0 0;
-  font-size: 13px;
+  font-size: 12px;
   min-width: 237px;
-  padding: 10px 8px;
+  padding: 0px 8px 0px 16px;
   position: relative;
 }
 
 /* Increase center column width overall. */
+/*
 .gws-flights-results__results-container.gws-flights__center-content,
-.gws-flights__center-content.gws-flights-results__selections-list {
+.gws-flights__center-content.gws-flights-results__selections-list {*/
+.hJYf4 {
   max-width: 1148px;
   width: 1148px;
 }
 /* To make heading position acceptable. */
-.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {
+/*.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {*/
+.tEXind {
   justify-content: flex-end;
 }
 
@@ -30,7 +33,7 @@
 }
 
 .legroom-row-extend .leg {
-  padding: 8px 8px 2px;
+  padding: 0px 8px 2px;
   white-space: nowrap;
 }
 
@@ -50,12 +53,30 @@
 .legroom-row-extend .video .leg,
 .legroom-row-extend .power .leg {
   background-size: 16px;
-  background-position: left 7px;
+  background-position: 0px;
   background-repeat: no-repeat;
-  height: 12px;
+  height: 18px;
+  opacity: 0.54;
+}
+.legroom-row-extend .wifi .leg {
+  background-image: url("wifi_black_24dp.svg");
+}
+.legroom-row-extend .power .leg {
+  background-image: url("power_black_24dp.svg");
+}
+.legroom-row-extend .video .leg.ondemand {
+  background-image: url("ondemand_video_black_24dp.svg");
+}
+.legroom-row-extend .video .leg.stream {
+  background-image: url("tap_and_play_black_24dp.svg");
+}
+.legroom-row-extend .wifi .leg.none,
+.legroom-row-extend .video .leg.none,
+.legroom-row-extend .power .leg.none {
+  background-image: none;
 }
 .legroom-row-extend .aircraft {
-  width: 48px;
+  width: 128px;
 }
 .legroom-row-extend .aircraft .leg {
   overflow: hidden;

@@ -6,21 +6,26 @@ function observeDom() {
       if (m.type != 'childList' || m.addedNodes.length <= 0) {
         return;
       }
-      for (var i = 0; i < m.addedNodes.length; i++) {
-        handleAddedNode(m.addedNodes.item(i));
+      try {
+        for (var i = 0; i < m.addedNodes.length; i++) {
+          handleAddedNode(m.addedNodes.item(i));
+        }
+      } catch(e) {
+        console.log(e);
       }
     });
   }).observe(document.body, { childList: true, subtree: true });
 
   function handleAddedNode(node) {
     if (node.classList &&
-        node.classList.contains('gws-flights-results__heading-disclaimer')) {
+        node.classList.contains('tEXind')) {
+        //node.classList.contains('gws-flights-results__heading-disclaimer')) {
       handleHeader(node);
       return;
     }
-    if (node.classList &&
-        (node.classList.contains('gws-flights-widgets-expandablecard__body') ||
-        node.classList.contains('gws-flights-widgets-expandablecard__card'))) {
+    if (node.tagName = 'DIV' &&
+        node.getAttribute && node.getAttribute('role') == 'listitem' &&
+        node.hasAttribute && node.hasAttribute('data-id')) {
       handleExpandableCard(node);
       return;
     }
@@ -33,8 +38,13 @@ function observeDom() {
 }
 
 function handleHeader(header) {
+  if (document.querySelector('.legroom-header')) {
+    // Already added. Skip.
+    return;
+  }
   header = header ||
-      document.querySelector('.gws-flights-results__heading-disclaimer');
+      document.querySelector('.i01GId');
+      //document.querySelector('.gws-flights-results__heading-disclaimer');
   if (!header) {
     return;  // No need to do anything.
   }
@@ -46,44 +56,10 @@ function handleHeader(header) {
 }
 
 function handleExpandableCard(node) {
-  let legs = [];
-  let legElems = node.querySelectorAll('.gws-flights-results__leg');
-  legElems.forEach((legElem) => {
-    let amenitiesElems =
-        legElem.querySelectorAll('.gws-flights-results__leg-amenities>ul li');
-    let amenities = {};
-    amenitiesElems.forEach(item => {
-      let a = extractAmenities(item);
-      if (a) {
-        amenities[a.name] = a;
-      }
-    });
-    let aircraftElem = legElem.querySelector('.gws-flights-results__aircraft-type');
-    if (aircraftElem) {
-      amenities.aircraft = {
-        text: aircraftElem.innerText
-      };
-    }
-    legs.push({ amenities: amenities });
-  });
+  let itineraryId = node.getAttribute('data-id');
+  let row = node.querySelector('div.OgQvJf');
 
-  let rowLi = node.closest('li.gws-flights-results__result-item');
-  if (rowLi) {
-    let itineraryId = rowLi.getAttribute('data-fp');
-    let row = rowLi.querySelector(
-        'div.gws-flights-results__itinerary-card-summary');
-    extendRow(row, legs, itineraryId);
-    return;
-  }
-  // Maybe booking page.
-  let fpDiv = node.querySelector('div[data-fp]');
-  if (!fpDiv) {
-    return; // Maybe not.
-  }
-  let itineraryId = fpDiv.getAttribute('data-fp');
-  let row = node.querySelector(
-      'div.gws-flights-results__itinerary-card-summary');
-  extendRow(row, legs, itineraryId);
+  extendRow(row, itineraryId);
   return;
 }
 
@@ -137,7 +113,7 @@ let settings = {
   inch: false
 };
 
-function extendRow(rowElem, legs, itineraryId) {
+function extendRow(rowElem, itineraryId) {
   // Do not repeat.
   if (rowElem.querySelector('.legroom-row-extend')) {
     return;
@@ -145,58 +121,27 @@ function extendRow(rowElem, legs, itineraryId) {
   let wrap = document.createElement('div');
   wrap.classList.add('legroom-row-extend');
   wrap.setAttribute('itin-id', itineraryId);
-  if (settings.wifi) {
-    wrap.appendChild(buildAmenitiesElement(legs, 'wifi'));
-  }
-  if (settings.power) {
-    wrap.appendChild(buildAmenitiesElement(legs, 'power'));
-  }
-  if (settings.video) {
-    wrap.appendChild(buildAmenitiesElement(legs, 'video'));
-  }
-  if (settings.aircraft) {
-    let itinerary = taco5.flightdata.get(itineraryId);
-    let updatedLegs = legs;
-    if (itinerary) {
-      updatedLegs = legs.map(l => Object.clone(l));
-      legs.forEach((leg, i) => {
-        let itinFlight = itinerary.flights[i];
-        if (itinFlight && itinFlight.aircraft) {
-          leg.amenities.aircraft.title = leg.amenities.aircraft.text;
-          leg.amenities.aircraft.text = itinFlight.aircraft;
-        }
-      });
-    }
-    wrap.appendChild(buildAmenitiesElement(updatedLegs, 'aircraft'));
-  }
-  if (settings.legroom) {
-    let itinerary = taco5.flightdata.get(itineraryId);
-    let updatedLegs = legs;
-    if (itinerary) {
-      updatedLegs = legs.map(l => Object.clone(l));
-      legs.forEach((leg, i) => {
-        let itinFlight = itinerary.flights[i];
-        if(itinFlight.legroomLength) {
-          leg.amenities.seat.title = leg.amenities.seat.text;
-          leg.amenities.seat.text = itinFlight.legroomLength;
-        } else if (itinFlight.legroomInfo) {
-          leg.amenities.seat.title = leg.amenities.seat.text;
-          leg.amenities.seat.text = itinFlight.legroomInfo;
-        }
-      });
-    }
-    wrap.appendChild(buildAmenitiesElement(legs, 'seat'));
-  }
   rowElem.appendChild(wrap);
 }
 
-function updateRow(rowElem, value) {
-  let aircraftElem = rowElem.querySelector('div.aircraft');
-  if (aircraftElem) {
-    let legElems = aircraftElem.querySelectorAll('.leg');
-    legElems.forEach((elem, i) => {
-      elem.textContent = value.flights[i].aircraft;
-    });
+function updateRow(rowExtend, value) {
+  // Clearup existing children.
+  rowExtend.replaceChildren();
+  let legs = value.flights;
+  if (settings.aircraft) {
+    rowExtend.appendChild(buildAmenitiesIcon(legs, 'wifi'));
+  }
+  if (settings.aircraft) {
+    rowExtend.appendChild(buildAmenitiesIcon(legs, 'power'));
+  }
+  if (settings.aircraft) {
+    rowExtend.appendChild(buildAmenitiesIcon(legs, 'video'));
+  }
+  if (settings.aircraft) {
+    rowExtend.appendChild(buildAmenitiesElement(legs, 'aircraft'));
+  }
+  if (settings.legroom) {
+    rowExtend.appendChild(buildAmenitiesElement(legs, 'legroomLength'));
   }
 }
 
@@ -214,15 +159,8 @@ function buildAmenitiesElement(legs, amenityName) {
     let leg = document.createElement('div');
     leg.classList.add('leg');
     if (amenity) {
-      if (amenity.text) {
-        leg.innerText = amenity.text;
-        if (amenity.text && amenity.text.length > 10) {
-          leg.title = amenity.text;
-        }
-      }
-      if (amenity.title || amenity.alt) {
-        leg.title = amenity.title || amenity.alt;
-      }
+      leg.innerText = amenity;
+      leg.title = amenity;
       if (amenity.cssClass) {
         leg.classList.add(amenity.cssClass);
       }
@@ -233,14 +171,45 @@ function buildAmenitiesElement(legs, amenityName) {
   let elem = document.createElement('div')
   elem.classList.add(amenityName);
   legs.forEach((leg) => {
-    let amenity = leg.amenities[amenityName];
+    let amenity = leg[amenityName];
     elem.appendChild(legElem(amenity));
   });
   return elem;
 }
 
+function buildAmenitiesIcon(legs, amenityName) {
+  function legElem(amenity) {
+    let leg = document.createElement('div');
+    leg.classList.add('leg');
+    if (isBoolean(amenity)) {
+      if (!amenity) {
+        leg.classList.add('none');
+      }
+    } else { // Not boolean. Add the value into classname instead.
+      leg.classList.add(amenity);
+    }
+    return leg;
+  }
+
+  let elem = document.createElement('div')
+  elem.classList.add(amenityName);
+  legs.forEach((leg) => {
+    let amenity = leg[amenityName];
+    elem.appendChild(legElem(amenity));
+  });
+  return elem;
+}
+
+function isBoolean(value) {
+  if ((!!value).toString() == value) {
+    return true;
+  }
+  return false;
+}
+
+// Look for expandable list items and augment them all.
 function queryAndExtend() {
-  let nodes = document.querySelectorAll('.gws-flights-widgets-expandablecard__body');
+  let nodes = document.querySelectorAll('div[role="listitem"][data-id]');
   if (nodes.length > 0) {
     nodes.forEach(handleExpandableCard);
     handleHeader();
