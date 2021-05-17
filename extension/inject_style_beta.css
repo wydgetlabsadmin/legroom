@@ -4,8 +4,8 @@
   display: flex;
   flex: 0 0;
   font-size: 12px;
-  min-width: 237px;
-  padding: 0px 8px 0px 16px;
+  min-width: 227px;
+  padding: 0px 0px 0px 16px;
   position: relative;
 }
 
@@ -14,8 +14,8 @@
 .gws-flights-results__results-container.gws-flights__center-content,
 .gws-flights__center-content.gws-flights-results__selections-list {*/
 .hJYf4 {
-  max-width: 1148px;
-  width: 1148px;
+  max-width: 1178px;
+  width: 1178px;
 }
 /* To make heading position acceptable. */
 /*.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {*/
@@ -61,8 +61,11 @@
 .legroom-row-extend .wifi .leg {
   background-image: url("wifi_black_24dp.svg");
 }
-.legroom-row-extend .power .leg {
+.legroom-row-extend .power .leg.plug {
   background-image: url("power_black_24dp.svg");
+}
+.legroom-row-extend .power .leg.usb {
+  background-image: url("usb_black_24dp.svg");
 }
 .legroom-row-extend .video .leg.ondemand {
   background-image: url("ondemand_video_black_24dp.svg");
@@ -82,7 +85,37 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
+.legroom-row-extend .legroomLength .leg.above {
+  color: forestgreen;
+  font-weight: bold;
+}
+.legroom-row-extend .legroomLength .leg.below {
+  color: red;
+  font-weight: bold;
+}
+.legroom-row-extend .legroomLength .leg.icon {
+  background-size: 18px;
+  background-position: 8px 0px;
+  background-repeat: no-repeat;
+  height: 18px;
+  width: 24px;
+  opacity: 0.54;
+}
+.legroom-row-extend .legroomLength .leg.icon.reclining {
+  background-image: url("airline_seat_recline_normal_black_24dp.svg");
+}
+.legroom-row-extend .legroomLength .leg.icon.extra-reclining {
+  background-image: url("airline_seat_recline_extra_black_24dp.svg");
+}
+.legroom-row-extend .legroomLength .leg.icon.lie-flat {
+  background-image: url("airline_seat_flat_black_24dp.svg");
+}
+.legroom-row-extend .legroomLength .leg.icon.suite {
+  background-image: url("airline_seat_individual_suite_black_24dp.svg");
+}
+.legroom-row-extend .legroomLength .leg.icon.angled-flat {
+  background-image: url("airline_seat_flat_angled_black_24dp.svg");
+}
 .legroom-header {
   background: transparent;
   color: rgba(0, 0, 0, .54);

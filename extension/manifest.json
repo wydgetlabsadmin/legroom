@@ -26,7 +26,13 @@
     "wifi_black_24dp.svg",
     "power_black_24dp.svg",
     "ondemand_video_black_24dp.svg",
-    "tap_and_play_black_24dp.svg"
+    "tap_and_play_black_24dp.svg",
+    "airline_seat_recline_normal_black_24dp.svg",
+    "airline_seat_recline_extra_black_24dp.svg",
+    "airline_seat_flat_black_24dp.svg",
+    "airline_seat_individual_suite_black_24dp.svg",
+    "airline_seat_flat_angled_black_24dp.svg",
+    "usb_black_24dp.svg"
   ],
   "content_scripts": [{
     "matches": [

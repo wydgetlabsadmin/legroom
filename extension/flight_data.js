@@ -93,16 +93,13 @@
       return; // Not data that we want.
     }
     reqId = reqId.substr(7);
-	console.log('got reqId: ' + reqId);
-	// Use _reqId for now. Not sure what we really here anymore.
     updateCacheWithRequestObject(reqId);
   }
 
   function processSearchResult(resultObj) {
-	console.log(resultObj);
     let itineraries = [];
 
-	// Search result.
+    // Search result.
     if (resultObj[2]) {
 	  let results = resultObj[2];
       let bestItineraries = results[0];
@@ -224,11 +221,24 @@
       legroomLength: flightPb[14],
       legroomInfo: LEGROOM_INFO[flightPb[13]] || flightPb[13],
       wifi: flightPb[12] && !!flightPb[12][0],
-      power: flightPb[12] && (!!flightPb[12][3] || !!flightPb[12][1]),
+      power: extractPowerSetup(flightPb[12]),
       video : extractVideoSetup(flightPb[12]),
       seatClass: toSeatClass(flightPb[16]),
       raw: flightPb
     }
+  }
+
+  function extractPowerSetup(amenities) {
+    if(!amenities) {
+      return null;
+    }
+    if (amenities[1] || amenities[3]) {
+      return 'plug';
+    }
+    if (amenities[5]) {
+      return 'usb';
+    }
+    return null;
   }
 
   function extractVideoSetup(amenities) {

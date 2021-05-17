@@ -138,10 +138,10 @@ function updateRow(rowExtend, value) {
     rowExtend.appendChild(buildAmenitiesIcon(legs, 'video'));
   }
   if (settings.aircraft) {
-    rowExtend.appendChild(buildAmenitiesElement(legs, 'aircraft'));
+    rowExtend.appendChild(buildAmenitiesText(legs, 'aircraft'));
   }
   if (settings.legroom) {
-    rowExtend.appendChild(buildAmenitiesElement(legs, 'legroomLength'));
+    rowExtend.appendChild(buildAmenitiesLegroom(legs));
   }
 }
 
@@ -154,8 +154,18 @@ if (!Object.clone) {
   }
 }
 
-function buildAmenitiesElement(legs, amenityName) {
-  function legElem(amenity) {
+function buildAmenitiesElement(legs, amenityName, builder) {
+  let elem = document.createElement('div')
+  elem.classList.add(amenityName);
+  legs.slice(0, 2).forEach((leg, i) => {
+    let amenity = leg[amenityName];
+    elem.appendChild(builder(amenity, i));
+  });
+  return elem;
+}
+
+function buildAmenitiesText(legs, amenityName, cssClass) {
+  function legElemBuilder(amenity) {
     let leg = document.createElement('div');
     leg.classList.add('leg');
     if (amenity) {
@@ -168,17 +178,11 @@ function buildAmenitiesElement(legs, amenityName) {
     return leg;
   }
 
-  let elem = document.createElement('div')
-  elem.classList.add(amenityName);
-  legs.forEach((leg) => {
-    let amenity = leg[amenityName];
-    elem.appendChild(legElem(amenity));
-  });
-  return elem;
+  return buildAmenitiesElement(legs, amenityName, legElemBuilder);
 }
 
 function buildAmenitiesIcon(legs, amenityName) {
-  function legElem(amenity) {
+  function legElemBuilder(amenity) {
     let leg = document.createElement('div');
     leg.classList.add('leg');
     if (isBoolean(amenity)) {
@@ -191,17 +195,33 @@ function buildAmenitiesIcon(legs, amenityName) {
     return leg;
   }
 
-  let elem = document.createElement('div')
-  elem.classList.add(amenityName);
-  legs.forEach((leg) => {
-    let amenity = leg[amenityName];
-    elem.appendChild(legElem(amenity));
-  });
-  return elem;
+  return buildAmenitiesElement(legs, amenityName, legElemBuilder);
+}
+
+function buildAmenitiesLegroom(legs) {
+  function legElemBuilder(amenity, i) {
+    let leg = document.createElement('div');
+    leg.classList.add('leg');
+    // Check if legroom length exists.
+    // If no, just use info.
+    // If yes, use it and use info for css class.
+    if (legs[i].legroomLength) {
+      leg.innerText = legs[i].legroomLength;
+      leg.title = legs[i].legroomLength;
+      leg.classList.add(legs[i].legroomInfo.toLowerCase());
+    } else if (legs[i].legroomInfo) {
+      leg.classList.add('icon');
+      leg.classList.add(legs[i].legroomInfo.toLowerCase().replace(' ', '-'));
+      leg.title = legs[i].legroomInfo;
+    }
+    return leg;
+  }
+
+  return buildAmenitiesElement(legs, 'legroomLength', legElemBuilder);
 }
 
 function isBoolean(value) {
-  if ((!!value).toString() == value) {
+  if (value == 'true' || value == 'false' || value === true || value === false) {
     return true;
   }
   return false;
