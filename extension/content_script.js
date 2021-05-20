@@ -18,15 +18,6 @@
   insertCss('inject_style_beta.css');
 })();
 
-// Pass in chrome extension ID.
-(function() {
-  let sharedElem = document.body.querySelector('.' + chrome.runtime.id);
-  sharedElem = document.createElement('div');
-  sharedElem.classList.add('shared-elem');
-  sharedElem.textContent = chrome.runtime.id;
-  document.body.append(sharedElem);
-})();
-
 window.addEventListener('load', function() {
   chrome.runtime.sendMessage(
       chrome.runtime.id, { type:'activate' });
@@ -36,49 +27,4 @@ window.addEventListener('unload', function() {
   chrome.runtime.sendMessage(
       chrome.runtime.id, { type:'disactivate' });
 });
-
-window.addEventListener('message', function(messageEvent) {
-  let message = messageEvent.data;
-  if (message.type == 'legroom_setting') {
-    if (message.action == 'fetch') {
-      fetchSettingAndInject();
-    }
-  }
-});
-
-// Listen to events from extension.
-function setupExtensionConnection() {
-  let port;
-  try {
-    port = chrome.runtime.connect({ name: 'content' });
-  } catch (e) {
-    console.log(e);
-  }
-  port.onMessage.addListener(function(message) {
-    if (message.type == 'setting_updated') {
-      injectSetting(message.setting);
-    }
-  });
-  port.onDisconnect.addListener(function() {
-    // Reopen again.
-    if (chrome.runtime.lastError) {
-      console.log(chrome.runtime.lastError);
-    } else {
-      window.setTimeout(setupExtensionConnection, 500);
-    }
-  });
-}
-setupExtensionConnection();
-
-function fetchSettingAndInject() {
-  chrome.runtime.sendMessage(
-      chrome.runtime.id, { type: 'fetch_setting', caller: 'content' },
-      injectSetting);
-}
-
-function injectSetting(setting) {
-  window.postMessage(
-      { type: 'legroom_setting', action: 'setting', setting: setting },
-      window.origin);
-}
 

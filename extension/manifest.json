@@ -1,11 +1,11 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
 
   "name": "Legrooms for Google Flights",
   "short_name": "Legroom,pls",
   "description": "Enhances Google Flights search by surfacing legrooms, carry-on restrictions and other amenities on search result list.",
   "version": "1.9.1",
-  "browser_action": {
+  "action": {
     "default_icon": {
       "16": "seat_16_grey.png",
       "48": "seat_48_grey.png",
@@ -15,25 +15,55 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "activeTab"
   ],
-  "web_accessible_resources": [
-    "inject_script.js",
-    "inject_script_beta.js",
-    "inject_style.css",
-    "inject_style_beta.css",
-    "flight_data.js",
-    "wifi_black_24dp.svg",
-    "power_black_24dp.svg",
-    "ondemand_video_black_24dp.svg",
-    "tap_and_play_black_24dp.svg",
-    "airline_seat_recline_normal_black_24dp.svg",
-    "airline_seat_recline_extra_black_24dp.svg",
-    "airline_seat_flat_black_24dp.svg",
-    "airline_seat_individual_suite_black_24dp.svg",
-    "airline_seat_flat_angled_black_24dp.svg",
-    "usb_black_24dp.svg"
-  ],
+  "web_accessible_resources": [{
+    "resources": [
+      "inject_script.js",
+      "inject_script_beta.js",
+      "inject_style.css",
+      "inject_style_beta.css",
+      "flight_data.js",
+      "wifi_black_24dp.svg",
+      "power_black_24dp.svg",
+      "ondemand_video_black_24dp.svg",
+      "tap_and_play_black_24dp.svg",
+      "airline_seat_recline_normal_black_24dp.svg",
+      "airline_seat_recline_extra_black_24dp.svg",
+      "airline_seat_flat_black_24dp.svg",
+      "airline_seat_individual_suite_black_24dp.svg",
+      "airline_seat_flat_angled_black_24dp.svg",
+      "usb_black_24dp.svg"
+    ],
+    "matches": [
+      "https://www.google.com/*",
+      "https://www.google.ca/*",
+      "https://www.google.com.pr/*",
+      "https://www.google.ie/*",
+      "https://www.google.ch/*",
+      "https://www.google.com.my/*",
+      "https://www.google.be/*",
+      "https://www.google.nl/*",
+      "https://www.google.pt/*",
+      "https://www.google.es/*",
+      "https://www.google.de/*",
+      "https://www.google.com.br/*",
+      "https://www.google.co.nz/*",
+      "https://www.google.co.uk/*",
+      "https://www.google.at/*",
+      "https://www.google.fr/*",
+      "https://www.google.com.au/*",
+      "https://www.google.no/*",
+      "https://www.google.se/*",
+      "https://www.google.dk/*",
+      "https://www.google.it/*",
+      "https://www.google.com.mx/*",
+      "https://www.google.co.in/*",
+      "https://www.google.pl/*",
+      "https://www.google.co.id/*",
+      "https://www.google.co.jp/*",
+      "https://www.google.ru/*"
+    ]
+  }],
   "content_scripts": [{
     "matches": [
       "https://www.google.com/travel/flights/*",
@@ -65,10 +95,9 @@
       "https://www.google.ru/travel/flights*"
     ],
     "js": [ "content_script.js" ],
-    "run_at": "document_end"
+    "run_at": "document_idle"
   }],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   }
 }

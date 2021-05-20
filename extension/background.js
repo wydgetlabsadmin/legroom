@@ -48,7 +48,7 @@ chrome.runtime.onMessage.addListener(
       }
       if (message.type == 'activate') {
         activeTabIds.add(sender.tab.id);
-        chrome.browserAction.setIcon({
+        chrome.action.setIcon({
           tabId: sender.tab.id,
           path: {
             '16':'seat_16.png',
@@ -59,7 +59,7 @@ chrome.runtime.onMessage.addListener(
       }
       if (message.type == 'disactivate') {
         activeTabIds.delete(sender.tab.id);
-        chrome.browserAction.setIcon({
+        chrome.action.setIcon({
           tabId: sender.tab.id,
           path: {
             '16':'seat_16_grey.png',
