@@ -154,14 +154,11 @@
         } catch (e) {
           console.log('Error while parsing response as JSON.');
           console.log(e);
-          console.log('Actual response.');
-          console.log(json);
           throw e;
         }
 
         if (!respObj) {
           console.log('Unknown response:');
-          console.log(respObj);
           return;
         }
 
@@ -186,7 +183,6 @@
   };
 
   function processItinerary(itinArray) {
-    console.log(itinArray);
     return {
       name: itinArray[0][17], // Correspond with data-slice-id in UI.
       price: itinArray[0][9],
