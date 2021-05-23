@@ -5,7 +5,7 @@
   flex: 0 0;
   font-size: 12px;
   min-width: 227px;
-  padding: 0px 0px 0px 16px;
+  padding: 0px 0px 0px 32px;
   position: relative;
 }
 
@@ -21,6 +21,11 @@
 /*.gws-flights-results__best-flights .gws-flights-results__heading-disclaimer {*/
 .tEXind {
   justify-content: flex-end;
+}
+
+/* Column that display departure and arrival time + airlines name. */
+.mxvQLc.ceis6c .Ir0Voe {
+	flex-basis: 30%; /* originally 35% */
 }
 
 .legroom-row-extend .seat {
