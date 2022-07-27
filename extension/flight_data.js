@@ -158,7 +158,6 @@
         }
 
         if (!respObj) {
-          console.log('Unknown response:');
           return;
         }
 

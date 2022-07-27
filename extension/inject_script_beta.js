@@ -18,14 +18,21 @@ function observeDom() {
 
   function handleAddedNode(node) {
     if (node.classList &&
-        node.classList.contains('tEXind')) {
+        //node.classList.contains('Vhw2sf')) {
+        //node.classList.contains('yCTReb')) {
+        node.classList.contains('EJKJ7')) {
+        //node.classList.contains('tEXind')) {
         //node.classList.contains('gws-flights-results__heading-disclaimer')) {
       handleHeader(node);
       return;
     }
     if (node.tagName = 'DIV' &&
-        node.getAttribute && node.getAttribute('role') == 'listitem' &&
-        node.hasAttribute && node.hasAttribute('data-id')) {
+        //node.getAttribute && node.getAttribute('role') == 'listitem' &&
+        node.classList &&
+        node.classList.contains('gQ6yfe') &&
+        node.hasAttribute && 
+        node.hasAttribute('data-ved') &&
+        node.hasAttribute('data-id')) {
       handleExpandableCard(node);
       return;
     }
@@ -37,14 +44,31 @@ function observeDom() {
   }
 }
 
+let elementReattacher = new MutationObserver(function(mutations, o) {
+  mutations.forEach(function(m) {
+    if (m.type = 'childList' && m.removedNodes.length > 0) {
+      for (let i = 0; i < m.removedNodes.length; i++) {
+        let removedNode = m.removedNodes.item(i);
+        if (removedNode.classList && (
+            removedNode.classList.contains('legroom-header') ||
+            removedNode.classList.contains('legroom-row-extend') 
+          )) {
+          // Let's reattach this.
+          let parent = m.target;
+          parent.appendChild(removedNode);
+          //window.setTimeout(() => { parent.appendChild(removedNode); }, 0);
+        }
+      }
+    }
+  });
+});
+
 function handleHeader(header) {
   if (document.querySelector('.legroom-header')) {
     // Already added. Skip.
     return;
   }
-  header = header ||
-      document.querySelector('.i01GId');
-      //document.querySelector('.gws-flights-results__heading-disclaimer');
+  header = header || document.querySelector('.EJKJ7');
   if (!header) {
     return;  // No need to do anything.
   }
@@ -53,12 +77,14 @@ function handleHeader(header) {
   div.classList.add('legroom-header');
   div.innerText = 'Enhanced by Legroom for Google Flights.';
   header.appendChild(div);
+
+  elementReattacher.observe(header, { childList: true });
 }
 
 function handleExpandableCard(node) {
   let itineraryId = node.getAttribute('data-id');
   let row = node.querySelector('div.OgQvJf');
-
+  
   extendRow(row, itineraryId);
   return;
 }
@@ -115,13 +141,25 @@ let settings = {
 
 function extendRow(rowElem, itineraryId) {
   // Do not repeat.
-  if (rowElem.querySelector('.legroom-row-extend')) {
-    return;
+  let wrap = rowElem.querySelector('.legroom-row-extend');
+  if (!wrap) {
+    wrap = document.createElement('div');
+    wrap.classList.add('legroom-row-extend');
+    wrap.setAttribute('itin-id', itineraryId);
+    rowElem.appendChild(wrap);
+
+    elementReattacher.observe(rowElem, { childList: true });
   }
-  let wrap = document.createElement('div');
-  wrap.classList.add('legroom-row-extend');
-  wrap.setAttribute('itin-id', itineraryId);
-  rowElem.appendChild(wrap);
+
+  try {
+    let data = window.taco5.flightdata.get(itineraryId);
+    if (data) {
+      updateRow(wrap, data);
+    }
+  } catch(e) {
+    console.error(e);
+    throw e;
+  }
 }
 
 function updateRow(rowExtend, value) {
@@ -238,7 +276,7 @@ function queryAndExtend() {
   }
 }
 
-console.log('Legroom extension for Google Flights.');
+console.log('Legroom extension for Google Flights v1.9.4.');
 // Do it at least once.
 queryAndExtend();
 
