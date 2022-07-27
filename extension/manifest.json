@@ -121,6 +121,10 @@
       "https://www.google.co.jp/travel/flights*",
       "https://www.google.ru/travel/flights*"
     ],
+    "include_globs": [
+      "*://*.google.com/flights*",
+      "*://*.google.com/travel/flights*"
+    ],
     "js": [ "content_script.js" ],
     "run_at": "document_idle"
   }],
