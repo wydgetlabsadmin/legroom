@@ -8,3 +8,5 @@ With this extension, legrooms and carry-on restrictions information will be show
 
 [Link to Chrome Web Store](https://chrome.google.com/webstore/detail/legrooms-for-google-fligh/nhonfddkgankhjilponlbdccpabaaknp).
 
+[User Guide](https://github.com/dbugger/legroom/blob/master/docs/user_guide.md#troubleshooting-guide)
+
