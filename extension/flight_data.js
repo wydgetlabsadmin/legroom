@@ -184,7 +184,7 @@
   function processItinerary(itinArray) {
     return {
       name: itinArray[0][17], // Correspond with data-slice-id in UI.
-      price: itinArray[0][9],
+      price: itinArray[1][0][1],
       flights: itinArray[0][2].map(toFlight),
       lookupId: itinArray[0][17] // Correspond with data-slide-id in UI.
     };
