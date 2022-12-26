@@ -8,6 +8,11 @@
   padding: 0px 0px 0px 32px;
   position: relative;
 }
+@media (prefers-color-scheme: dark) {
+  .legroom-row-extend {
+    color: rgb(154,160,166);
+  }
+}
 
 /* Increase center column width overall. */
 /*
@@ -63,6 +68,14 @@
   height: 18px;
   opacity: 0.54;
 }
+/* To change icon colors on dark-mode. */
+@media (prefers-color-scheme: dark) {
+  .legroom-row-extend .wifi .leg,
+  .legroom-row-extend .video .leg,
+  .legroom-row-extend .power .leg {
+    filter: invert(100%);
+  }
+}
 .legroom-row-extend .wifi .leg {
   background-image: url("wifi_black_24dp.svg");
 }
@@ -105,6 +118,12 @@
   height: 18px;
   width: 24px;
   opacity: 0.54;
+}
+/* To change icon colors on dark-mode. */
+@media (prefers-color-scheme: dark) {
+  .legroom-row-extend .legroomLength .leg.icon {
+    filter: invert(100%);
+  }
 }
 .legroom-row-extend .legroomLength .leg.icon.reclining {
   background-image: url("airline_seat_recline_normal_black_24dp.svg");
