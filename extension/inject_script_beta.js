@@ -84,6 +84,9 @@ function handleHeader(header) {
 function handleExpandableCard(node) {
   let itineraryId = node.getAttribute('data-id');
   let row = node.querySelector('div.OgQvJf');
+  if(!row) {
+    return;  // Not a flight list item.
+  }
   
   extendRow(row, itineraryId);
   return;
@@ -267,7 +270,7 @@ function isBoolean(value) {
 
 // Look for expandable list items and augment them all.
 function queryAndExtend() {
-  let nodes = document.querySelectorAll('div[role="listitem"][data-id]');
+  let nodes = document.querySelectorAll('div[data-ved][data-id]');
   if (nodes.length > 0) {
     nodes.forEach(handleExpandableCard);
     handleHeader();
@@ -287,5 +290,27 @@ window.taco5.flightdata.addListener(function(id, data) {
     updateRow(extensionElem, data);
   }
 });
+
+function queryAndParseInlinedData() {
+  let scriptData = [];
+  document.querySelectorAll('script[nonce]').forEach(s=>scriptData.push(s.textContent));
+  scriptData = scriptData
+      .filter(sd=>sd.startsWith('AF_initDataCallback'))
+      .map(sd=>sd.slice(50,-20));
+  scriptData.forEach(sd=> {
+    try {
+      let flightData = JSON.parse(sd);
+      if(flightData.length && flightData.length == 27) {
+        // This is likely the right flight data.
+        window.taco5.flightdata.processSearchResult(flightData);
+      }
+    } catch (e) {
+      console.log('Fail to JSON parse inlined data.');
+      console.log(e);
+    }
+  });
+}
+
+queryAndParseInlinedData();
 
 })(); // Close closure wrap.

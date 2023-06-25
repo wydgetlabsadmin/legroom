@@ -120,6 +120,8 @@
     });
     updateCacheWithItineraries(itineraryMap);
   }
+  // Expose this function so inject_script_beta.js can call it.
+  window.taco5.flightdata.processSearchResult = processSearchResult;
 
   // Split multiple JSON protos.
   // Input usually looks like this 8[hello]9[banana]
