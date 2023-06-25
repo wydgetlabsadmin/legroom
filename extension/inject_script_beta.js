@@ -274,12 +274,11 @@ function queryAndExtend() {
   if (nodes.length > 0) {
     nodes.forEach(handleExpandableCard);
     handleHeader();
-  } else {
-    observeDom();
   }
+  observeDom();
 }
 
-console.log('Legroom extension for Google Flights v1.9.4.');
+console.log('Legroom extension for Google Flights v1.9.6.');
 // Do it at least once.
 queryAndExtend();
 
