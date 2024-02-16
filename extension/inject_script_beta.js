@@ -83,7 +83,7 @@ function handleHeader(header) {
 
 function handleExpandableCard(node) {
   let itineraryId = node.getAttribute('data-id');
-  let row = node.querySelector('div.OgQvJf');
+  let row = node.querySelector('div.OgQvJf .KhL0De');
   if(!row) {
     return;  // Not a flight list item.
   }

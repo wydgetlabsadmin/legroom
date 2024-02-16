@@ -18,7 +18,8 @@
 /*
 .gws-flights-results__results-container.gws-flights__center-content,
 .gws-flights__center-content.gws-flights-results__selections-list {*/
-.hJYf4 {
+/*.hJYf4 { */
+.PSZ8D {
   max-width: 1178px;
   width: 1178px;
 }
@@ -148,5 +149,11 @@
   padding: 16px 8px;
   text-align: right;
   width: 238px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .legroom-header {
+    color: rgb(154,160,166);
+  }
 }
 
